@@ -1,0 +1,688 @@
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage{lastpage} % Required to determine the last page for the footer
+\usepackage{extramarks} % Required for headers and footers
+\usepackage[usenames,dvipsnames]{color} % Required for custom colors
+\usepackage{graphicx} % Required to insert images
+\usepackage{amsmath}% http://ctan.org/pkg/amsmath
+\usepackage{listings} % Required for insertion of code
+%\usepackage{couriernew} % Required for the courier font
+
+\usepackage{enumerate} % Required for enumerating with letters
+
+\usepackage{mathpazo}
+% Palatino
+\usepackage{avant}
+\usepackage{inconsolata}
+
+\newcommand{\pN}{\mathcal{N}}
+\newcommand{\iid}{\overset{\text{iid}}{\sim}}
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1} % Line spacing
+
+% Set up the header and footer
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName} % Top left header
+\chead{\hmwkClass\ : \hmwkTitle} % Top center head
+\rhead{} % Top right header
+\lfoot{\lastxmark} % Bottom left footer
+\cfoot{} % Bottom center footer
+\rfoot{Page\ \thepage\ of\ \protect\pageref{LastPage}} % Bottom right footer
+\renewcommand\headrulewidth{0.4pt} % Size of the header rule
+\renewcommand\footrulewidth{0.4pt} % Size of the footer rule
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+%----------------------------------------------------------------------------------------
+%	CODE INCLUSION CONFIGURATION
+%----------------------------------------------------------------------------------------
+
+\definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0} % This is the color used for comments
+\lstloadlanguages{R} % Load R syntax for listings, for a list of other languages supported see: ftp://ftp.tex.ac.uk/tex-archive/macros/latex/contrib/listings/listings.pdf
+\lstset{language=R, % Use R in this example
+        frame=single, % Single frame around code
+        basicstyle=\small\ttfamily, % Use small true type font
+        keywordstyle=[1]\color{Blue}, % Perl functions bold and blue
+        keywordstyle=[2]\color{Purple}, % Perl function arguments purple
+        keywordstyle=[3]\color{Blue}\underbar, % Custom functions underlined and blue
+        identifierstyle=, % Nothing special about identifiers                                         
+        commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small, % Comments small dark green courier font
+        stringstyle=\color{Purple}, % Strings are purple
+        showstringspaces=false, % Don't put marks in string spaces
+        tabsize=4, % 5 spaces per tab
+        %
+        % Put standard Perl functions not included in the default language here
+        morekeywords={rand},
+        %
+        % Put Perl function parameters here
+        morekeywords=[2]{on, off, interp},
+        %
+        % Put user defined functions here
+        morekeywords=[3]{test},
+       	%
+        morecomment=[l][\color{Blue}]{...}, % Line continuation (...) like blue comment
+        numbers=left, % Line numbers on left
+        firstnumber=1, % Line numbers start with line 1
+        numberstyle=\tiny\color{Blue}, % Line numbers are blue and small
+        stepnumber=5 % Line numbers go in steps of 5
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\rscript}[2]{
+\begin{itemize}
+\item[]\lstinputlisting[caption=#2,label=#1]{#1.r}
+\end{itemize}
+}
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT STRUCTURE COMMANDS
+%	Skip this unless you know what you're doing
+%----------------------------------------------------------------------------------------
+
+% Header and footer for when a page split occurs within a problem environment
+\newcommand{\enterProblemHeader}[1]{
+\nobreak\extramarks{#1}{#1 continued on next page\ldots}\nobreak
+\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+}
+
+% Header and footer for when a page split occurs between problem environments
+\newcommand{\exitProblemHeader}[1]{
+\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+\nobreak\extramarks{#1}{}\nobreak
+}
+
+\setcounter{secnumdepth}{0} % Removes default section numbers
+\newcounter{homeworkProblemCounter} % Creates a counter to keep track of the number of problems
+
+\newcommand{\homeworkProblemName}{}
+\newenvironment{homeworkProblem}[1][Problem \arabic{homeworkProblemCounter}]{ % Makes a new environment called homeworkProblem which takes 1 argument (custom name) but the default is "Problem #"
+\stepcounter{homeworkProblemCounter} % Increase counter for number of problems
+\renewcommand{\homeworkProblemName}{#1} % Assign \homeworkProblemName the name of the problem
+\section{\homeworkProblemName} % Make a section in the document with the custom problem count
+\enterProblemHeader{\homeworkProblemName} % Header and footer within the environment
+}{
+\exitProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+\newcommand{\problemAnswer}[1]{ % Defines the problem answer command with the content as the only argument
+\noindent\framebox[\columnwidth][c]{\begin{minipage}{0.98\columnwidth}#1\end{minipage}} % Makes the box around the problem answer and puts the content inside
+}
+
+\newcommand{\homeworkSectionName}{}
+\newenvironment{homeworkSection}[1]{ % New environment for sections within homework problems, takes 1 argument - the name of the section
+\renewcommand{\homeworkSectionName}{#1} % Assign \homeworkSectionName to the name of the section from the environment argument
+\subsection{\homeworkSectionName} % Make a subsection with the custom name of the subsection
+\enterProblemHeader{\homeworkProblemName\ [\homeworkSectionName]} % Header and footer within the environment
+}{
+\enterProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+%----------------------------------------------------------------------------------------
+%	NAME AND CLASS SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\hmwkTitle}{Exercises 1} % Assignment title
+\newcommand{\hmwkDueDate}{\today} % Due date
+\newcommand{\hmwkClass}{SDS\ 383D} % Course/class
+\newcommand{\hmwkClassTime}{} % Class/lecture time
+\newcommand{\hmwkClassInstructor}{Professor Scott} % Teacher/lecturer
+\newcommand{\hmwkAuthorName}{Spencer Woody} % Your name
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title{
+\vspace{2in}
+\textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+\normalsize\vspace{0.1in}\small{\hmwkDueDate}\\
+\vspace{0.1in}\large{\textit{\hmwkClassInstructor\ }}
+\vspace{3in}
+}
+
+\author{\textbf{\hmwkAuthorName}}
+\date{} % Insert date here if you want it to appear below your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle
+
+\newpage
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 1
+%----------------------------------------------------------------------------------------
+
+% To have just one problem per page, simply put a \clearpage after each problem
+
+\begin{homeworkProblem}
+
+\large
+\textbf{Bayesian inference in simple conjugate families}
+\normalsize
+
+\begin{enumerate}[(A)]
+	\item % A
+	%
+	%
+	%
+	$ X_1, \ldots, X_N | w \overset{\text{iid}}{\sim} \text{Bernoulli}(w)$, $w \sim \text{Beta}(a, b)$. Define $Y := \sum_{i=1}^n X_i$, so $Y|w \sim \text{Binomial}(N, w)$.
+	%
+	%
+	%
+	\begin{align}
+		p(y | w) &= P(Y = y | w) = \binom{N}{y} w^y (1 - w)^{N - y} \\
+		p(w) &= \frac{\Gamma(a + b)}{\Gamma(a)\Gamma(b)}w^{a-1}(1-w)^{b-1}
+	\end{align}
+	%
+	%
+	%
+	By Bayes' Rule,
+	%
+	%
+	%
+	\begin{align}
+		p(w|y) &\propto p(w)p(y|w) \\
+		&\propto \left( w^{a-1}(1-w)^{b-1} \right) \left( w^y (1 - w)^{N - y} \right)\\
+		&= w^{a + y - 1}(1-w)^{b + N - y - 1},
+	\end{align}
+	%
+	%
+	%
+	so $w|y \sim \text{Beta}(a+y, b+N-y)$
+	%
+	%
+	%
+	\item % B 
+	%
+	%
+	%
+	We have two independently distributed variables, $X_1 \sim \text{Gamma}(a_1, 1)$ and $X_2 \sim \text{Gamma}(a_2, 1)$. The joint distribution of $X_1$ and $X_2$ is
+	%
+	%
+	%
+	\begin{align}
+		f_{X_1, X_2}(x_1, x_2) &= \frac{b^{a_1 + a_2}}{\Gamma(a_1)\Gamma(a_2)}x_1^{a_1 - 1}x_2^{a_2 - 1}\exp \left[ - \left( x_1 + x_2 \right) \right]
+	\end{align}
+	%
+	%
+	%
+	Then we define the transformation of variables $(X_1, X_2) \mapsto (Y_1, Y_2)$ as follows: 
+	%
+	%
+	%
+	\begin{align}
+		Y_1 &= \frac{X_1}{X_1 + X_2} \\
+		Y_2 &= X_1 + X_2. 
+	\end{align}
+	%
+	%
+	%
+	We can find the joint distribution of $Y_1$ and $Y_2$ with 
+	%
+	%
+	%
+	\begin{align}
+		f_{Y_1, Y_2}(y_1, y_2) &= f_{X_1, X_2}(g_1(y_1, y_2), g_2(y_1, y_2)) \left|J \right|, \label{tran}
+	\end{align}
+	%
+	%
+	%
+	where $x_1 = g_1(y_1, y_2) = y_1y_2$, $x_2 = g_2(y_1, y_2) = y_2(1-y_1)$, and $J$ is the determinant of the Jacobian matrix,
+	%
+	%
+	%
+	\begin{align}
+		J &= \begin{vmatrix}
+		\frac{\partial x_1}{\partial y_1} & \frac{\partial x_1}{\partial y_2}\\[1.0ex]
+		\frac{\partial x_2}{\partial y_1} & \frac{\partial x_2}{\partial y_2}
+			 \end{vmatrix} 
+	      = \begin{vmatrix}
+		 y_2 & y_1 \\
+		 -y_2 & 1-y1
+			 \end{vmatrix} = y_2(1-y_1) + y_2y_1 = y_2.
+	\end{align}
+	%
+	%
+	%
+	$Y_2$ is the ratio of two nonnegative variables, so $|J| = |y_2| = y_2.$ Now we can write (\ref{tran}) as 
+	%
+	%
+	%
+	\begin{align}
+		f_{Y_1, Y_2}(y_1, y_2) &= \frac{b^{a_1 + a_2}}{\Gamma(a_1)\Gamma(a_2)} \left( y_1 y_2 \right)^{a_1 - 1}\left[ y_2(1-y_1) \right]^{a_2 - 1}\exp \left[ - \left( y_1y_2 + y_2(1-y_1) \right) \right] y_2 \\
+		&= \frac{b^{a_1 + a_2}}{\Gamma(a_1)\Gamma(a_2)} y_1^{a_1 - 1}(1-y_1)^{a_2 - 1} y_2^{a_1 + a_2 - 1} \exp(-y_2).
+	\end{align}
+	%
+	%
+	%
+	Therefore, $Y_1 \sim \text{Beta}(a_1, a_2)$ independent of $Y_2 \sim \text{Gamma}(a_1 + a_2, 1)$.
+	%
+	%
+	%
+	\item % C
+	%
+	%
+	%
+	$X_i | \theta \iid \pN(\theta, \sigma^2)$, $i = 1, 2, \ldots, N$ where $\sigma^2$ is \emph{known} and $\theta \sim \pN(m, v)$ is \emph{unknown}. The posterior distribution of $\theta$ given $x_1, \ldots, x_N$ is 
+	%
+	%
+	%
+	\begin{align}
+		f(\theta | x_1, \ldots, x_N) &\propto f(x_1, \ldots, x_N | \theta) f(\theta)\\
+		&\propto \left( \prod_{i=1}^N \exp \left[ - \frac{(x_i - \theta)^2}{2\sigma^2} \right] \right) \exp\left[ - \frac{(\theta - m)^2}{2v} \right] \\
+		&= \exp\left[ - \frac{\sum_{i=1}^N(x_i - \theta)^2}{2\sigma^2} - \frac{(\theta - m)^2}{2v} \right] \\
+		&\propto \exp\left[ - \frac{n\theta^2 - 2n\bar{x}\theta}{2\sigma^2} - \frac{\theta^2 - 2m\theta}{2v} \right] \\
+		&= \exp\left[ - \frac{\theta^2 - 2\bar{x}\theta}{\frac{2\sigma^2}{n}} - \frac{\theta^2 - 2m\theta}{2v} \right] \\ 
+		&= \exp\left[ -\frac{1}{2 \frac{\sigma^2v}{n}} \left( v\theta^2 - 2v\bar{x}\theta + \frac{\sigma^2}{n} \theta^2 - 2 \frac{\sigma^2}{n} m \theta \right) \right] \\
+		&= \exp\left[ -\frac{1}{2 \frac{\sigma^2v}{n}} \left( \left[ v + \frac{\sigma^2}{n} \right]\theta^2 - 2 \left[ v\bar{x} + \frac{\sigma^2}{n} m \right]\theta  \right) \right] \\
+		&= \exp\left[ -\frac{1}{2 \frac{\sigma^2v}{n} \left( \frac{1}{v + \frac{\sigma^2}{n}} \right) } \left( \theta^2 - 2  \frac{v\bar{x} + \frac{\sigma^2}{n} m}{v + \frac{\sigma^2}{n}} \theta  \right) \right] \\
+		&\propto \exp\left[ -\frac{1}{2 \left( \frac{n}{\sigma^2} + \frac{1}{v} \right)^{-1}} \left( \theta -  \frac{v\bar{x} + \frac{\sigma^2}{n} m}{v + \frac{\sigma^2}{n}}  \right)^2 \right] \\
+		&= \exp\left[ -\frac{1}{2 \left( \frac{n}{\sigma^2} + \frac{1}{v} \right)^{-1}} \left( \theta -  \frac{\frac{\sum_{i=1}^N x_i}{\sigma^2} + \frac{m}{v}}{\frac{n}{\sigma^2} + \frac{1}{v}}  \right)^2 \right] \\
+		&= \exp\left[ -\frac{1}{2 \left( \frac{1}{v} + \frac{n}{\sigma^2} \right)^{-1}} \left( \theta -  \frac{\frac{m}{v} + \frac{\sum_{i=1}^N x_i}{\sigma^2}}{\frac{1}{v}  + \frac{n}{\sigma^2}} \right)^2 \right],
+	\end{align}
+	%
+	%
+	%
+	so 
+	\begin{align}
+	\theta | x_1,\ldots,x_2 \sim \pN \left( \frac{\frac{m}{v} + \frac{\sum_{i=1}^N x_i}{\sigma^2}}{\frac{1}{v}  + \frac{n}{\sigma^2}},  \left[ \frac{1}{v} + \frac{n}{\sigma^2} \right]^{-1} \right). 
+	\end{align}
+	%
+	%
+	%
+	\item % D
+	%
+	%
+	%
+	$X_i | \sigma^2 \iid \pN(\theta, \sigma^2)$, $i = 1, 2, \ldots, N$ where $\theta$ is \emph{known} and $\sigma^2 \sim \text{IG}(a, b)$ is \emph{unknown}. Let $w = \sigma^{-2}$ so $w \sim \text{Gamma}(a, b)$. The posterior distribution of $w$ given $x_1, \ldots, x_N$ is 
+	%
+	%
+	%
+	\begin{align}
+		f(w|x_1, \ldots, x_2) &\propto f(x_1, \ldots, x_2 | w) f(w) \\
+		&\propto \left( \prod_{i=1}^N w^{1/2} \exp \left[ - \frac{w}{2}(x_i - \theta)^2 \right] \right) w^{a-1} \exp(-bw) \\
+		&= w^{n/2} \exp \left[ -\frac{w}{2} \sum_{i=1}^N (x_i-\theta^2) \right] w^{a-1} \exp(-bw) \\
+		&= w^{a + n/2 - 1} \exp \left[ - \left( b + \frac{\sum_{i=1}^N (x_i-\theta^2)}{2} \right) w \right],
+	\end{align}
+	%
+	%
+	%
+	so
+	%
+	%
+	%
+	\begin{align}
+		w|x_1, \ldots, x_2 &\sim \text{Gamma}\left( a + \frac{n}{2}, b + \frac{\sum_{i=1}^N (x_i-\theta^2)}{2} \right) \\
+		\sigma^2 |x_1, \ldots, x_2 &\sim \text{IG}\left( a + \frac{n}{2}, b + \frac{\sum_{i=1}^N (x_i-\theta^2)}{2} \right)
+	\end{align}
+	%
+	%
+	%
+	\item % E
+	%
+	%
+	%
+	$X_i \sim \pN (\theta, \sigma_i^2)$, $i = 1, 2, \ldots, n$ where each $X_i \independent X_j, i \neq j$ is observed once and has a \emph{known} unique variance $\sigma_i^2$ and $\theta \sim \pN (m, v)$ is \emph{unknown}. The posterior distribution of $\theta$ is 
+	%
+	%
+	%
+	\begin{align}
+		f(\theta|x_1, \ldots, x_N) &\propto f(x_1, \ldots, x_N | \theta)f(\theta) \\
+		&\propto \left( \prod_{i=1}^N \exp \left[ - \frac{(x_i - \theta)^2}{2\sigma_i^2} \right]  \right) \exp \left[ - \frac{(\theta - m)^2}{2v} \right] \\
+		&= \exp \left[ - \frac{1}{2} \left( \sum_{i=1}^n \frac{(\theta - x_i)^2}{\sigma_i^2} + \frac{(\theta - m)^2}{v} \right) \right] \\
+		&\propto \exp \left[ -\frac{1}{2} \left( \sum_{i=1}^N \frac{1}{\sigma_i^2} \cdot \theta^2 - 2 \sum_{i=1}^N \frac{x_i}{\sigma_i^2} \cdot \theta + \frac{1}{v} \theta^2 - 2 \frac{m}{v} \theta \right) \right] \\ 
+		&= \exp \left[ -\frac{1}{2} \left( \left[ \frac{1}{v} + \sum_{i=1}^N \frac{1}{\sigma_i^2} \right] \theta^2 - 2 \left[ \frac{m}{v} + \sum_{i=1}^N \frac{x_i}{\sigma_i^2} \right] \theta \right) \right] \\
+		&= \exp \left[ - \frac{1}{2 \left( \frac{1}{v} + \sum_{i=1}^N \frac{1}{\sigma_i^2} \right)^{-1}} \left( \theta^2 - 2 \left[ \frac{\frac{m}{v}+ \sum_{i=1}^N \frac{x_i}{\sigma_i^2}}{\frac{1}{v} + \sum_{i=1}^N \frac{1}{\sigma_i^2}} \right] \theta \right) \right] \\
+		&\propto \exp \left[ - \frac{1}{2 \left( \frac{1}{v} + \sum_{i=1}^N \frac{1}{\sigma_i^2} \right)^{-1}} \left( \theta - \frac{\frac{m}{v}+ \sum_{i=1}^N \frac{x_i}{\sigma_i^2}}{\frac{1}{v} + \sum_{i=1}^N \frac{1}{\sigma_i^2}} \right)^2 \right],
+	\end{align}
+	%
+	%
+	%
+	so,
+	%
+	%
+	%
+	\begin{align}
+		\theta|x_1, \ldots, x_N \sim \pN \left( \frac{\frac{m}{v}+ \sum_{i=1}^N \frac{x_i}{\sigma_i^2}}{\frac{1}{v} + \sum_{i=1}^N \frac{1}{\sigma_i^2}} , \left( \frac{1}{v} + \sum_{i=1}^N \frac{1}{\sigma_i^2} \right)^{-1} \right).
+	\end{align}
+	%
+	%
+	%
+	\item % F
+	%
+	%
+	%
+	$X|\sigma^2 \sim \pN(0, \sigma^2)$, $w = \frac{1}{\sigma^2} \sim \text{Gamma}(a, b)$. The marginal distribution of $X$ is 
+	%
+	%
+	%
+	\begin{align}
+		f(x) &= \int_0^\infty f(x, w) dw \\
+		&= \int_0^\infty f(x | w)f(w) dw \\
+		&\propto \int_0^\infty w^{1/2} \exp \left( -\frac{w}{2}x^2 \right) w^{a-1} \exp\left( -bw \right) dw \\
+		&= \int_0^\infty w^{a - 1/2} \exp\left[ -\left( b + \frac{x^2}{2} \right) w \right] dw \;\;\; *\text{kernel of Gamma}\left(a + \frac{1}{2}, b + \frac{x^2}{2}\right) \\
+		&= \frac{\Gamma\left( a + \frac{1}{2} \right)}{\left( b + \frac{x^2}{2} \right)^{a + 1/2}}
+	\end{align} 
+	%
+	%
+	%
+\end{enumerate}
+
+\end{homeworkProblem}
+
+
+%
+%%----------------------------------------------------------------------------------------
+%%	PROBLEM 2
+%%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+
+\large
+\textbf{The multivariate normal distribution}
+\normalsize
+
+\emph{Basics}
+
+\begin{enumerate}[(A)]
+	\item % A 
+	Here we prove two properties of the covariance of a vector of random variables. First, note that $E(Ax + b) = A\mu + b$.\\
+	%
+	%
+	%
+	\begin{enumerate}[1.]
+		\item % 1
+		\begin{align}
+			\text{cov}(x) &= E \left( (x-\mu)(x-\mu)^T \right) \\
+			&= E\left( (x-\mu)(x^T-\mu^T) \right) \\
+			&= E \left( xx^T - x\mu^T - \mu x^T + \mu \mu^T \right) \\
+			&= E(xx^T) - E(x)\mu^T - \mu E(x^T) + \mu \mu^T \\
+			&= E(xx^T) - \mu \mu^T - \mu \mu^T + \mu \mu^T \\
+			&= E(xx^T) - \mu \mu^T
+		\end{align}
+		\item % 2
+		\begin{align}
+			\text{cov}(Ax + b) &= E\left( (Ax + b - (A\mu + b))(Ax + b - (A\mu + b))^T \right) \\
+			&= E\left( (Ax - A\mu)(Ax - A\mu)^T \right) \\ 
+			&= E\left( (Ax - A\mu) \left(x^TA^T - \mu^TA^T \right) \right) \\
+			&= E \left( Axx^TA- Ax\mu^TA^T - A\mu x^TA^T + A\mu \mu^T A^T \right) \\
+			&= E\left( Axx^TA^T \right) - E\left( Ax\mu^TA^T \right) - E \left( A\mu x^TA^T \right) + \left( A\mu \mu^T A^T \right) \\
+			&= A E\left(xx^T \right) A^T - A\mu\mu^TA^T - A\mu\mu^TA^T + A\mu\mu^TA^T\\
+			&= A E\left(xx^T \right) A^T - A\mu\mu^TA^T \\
+			&= A \left( E \left( xx^T \right) -\mu \mu^T \right) A^T \\
+			&= A \text{cov}(x) A^T
+		\end{align}
+	\end{enumerate}
+	%
+	%
+	%
+	\item % B
+	%
+	%
+	%
+	Define the vector $z = (z_1, \ldots, z_p)$ where $z_i \iid \pN(0, 1), i = 1, 2, \ldots, p$. Because each component is iid, the joint probability density function (PDF) for $z$ is 
+	%
+	%
+	%
+	\begin{align}
+		f(z) &= \prod_{i=1}^p \ (2\pi)^{-1/2} \exp \left( - {z_i^2/2} \right) \\
+		&= (2\pi)^{-p/2} \exp\left(-z^Tz/2\right).
+	\end{align}
+	%
+	%
+	%
+	For each component $z_i$, the moment generating function (MGF) is 
+	%
+	%
+	%
+	\begin{align}
+		M_{z_i}(t_i) &= E \left( \exp \left( {t_iz_i} \right) \right) \\
+		&= \int_{-\infty}^{+\infty} \exp \left( {t_iz_i} \right) \cdot f(z_i) dz_i \\
+		&= \int_{-\infty}^{+\infty} \exp \left( {t_iz_i} \right) \cdot (2\pi)^{-1/2} \exp\left( -z_i^2  / 2 \right) dz_i \\ 
+		&= \int_{-\infty}^{+\infty} (2\pi)^{-1/2} \exp\left( -z_i^2  / 2 + t_iz_i \right)dz_i \\
+		&= \exp \left( t_i^2 / 2 \right) \int_{-\infty}^{+\infty} (2\pi)^{-1/2} \exp \left( - \left[ z_i - t_i \right]^2 / 2 \right)dz_i \\
+		&= \exp \left( t_i^2 / 2 \right).
+	\end{align}
+	%
+	%
+	%
+	The MGF for the full vector $z$ is 
+	%
+	%
+	%
+	\begin{align}
+		M_z(t) &= E\left( \exp \left( t^T z \right) \right) \\
+		&= \prod_{i=1}^p E \left( \exp \left( {t_iz_i} \right) \right) \\
+		&= \prod_{i=1}^p \exp \left( t_i^2 / 2 \right) \\
+		&= \exp \left( \sum_{i=1}^p t_i^2 / 2 \right) \\
+		&= \exp \left( t^T t / 2 \right)
+	\end{align}
+	%
+	%
+	%
+	\item % C
+	%
+	%
+	%
+	We are trying to show that $x = (x_1,\ldots,x_p)$ is a multivariate normal distribution with mean vector $\mu$ and covariance matrix $\Sigma$. Let $a^Tx = z \sim \pN (m, v)$ ($z$ is now a scalar random variable). Let $t$ be a scalar, $a$ is a vector of length $p$, and $b = ta$ is also a vector of length $p$. The MGF of $z$ is 
+	%
+	%
+	%
+	\begin{align}
+		M_z(t) &= E\left( \exp \left( tz \right) \right) \\
+		&= E \left(  \exp \left( ta^Tx \right) \right) \\ 
+		&= E \left( \exp \left( bx \right) \right) \\
+		&= M_x(b) = \exp\left(mt + vt^2/2\right), \label{m}
+	\end{align}
+	%
+	%
+	%
+	by the MGF definition of the univariate normal distribution. We can solve for $m$ and $v$ in terms of $\mu$ and $\Sigma$ by using the first and second moments of $z$. The first moment of $z$ is equal to $E(z) = m$, and can also be expressed as
+	%
+	%
+	%
+	\begin{align}
+		E(z) &= E\left(a^Tx\right) \\
+		&= a^T E(x) \\
+		&= a^T \mu = m.
+	\end{align}
+	%
+	%
+	%
+	Note that $m^2 = (a^T \mu)^2 = a^T\mu \mu^T a$. Next, the second moment of $z$ is equal to $E(z^2) = \text{var}(z) + E(z)^2 = v + m^2$, which can also be expressed as
+	%
+	%
+	%
+	\begin{align}
+		E(z^2) &= E \left( z \cdot z \right) \\
+		&= E \left( a^Tx x^T a \right) \\
+		&= a^T E(x x^T) a \\
+		&= a^T (\text{cov}(x) + \mu^T \mu) a  \\
+		&= a^T (\Sigma + \mu^T \mu) a \\
+		&= a^T \Sigma a^ + a^T \mu^T \mu a = v + m^2 = v + a^T\mu \mu^T a \\
+		&\Rightarrow v = a^T \Sigma a
+	\end{align}
+	%
+	%
+	%
+	Now we return to the (\ref{m}) to write the MGF of $x$ as 
+	%
+	%
+	%
+	\begin{align}
+		M_x(b) &= \exp\left(mt + vt^2/2\right) \\
+		&= \exp\left(ta^T \mu + t^2 a^T \Sigma a^T/2\right) \\
+		&= \exp\left(ta^T \mu + (ta^T) \Sigma (ta)/2\right) \\
+		&= \exp \left( b^T\mu + b^T \Sigma b / 2\right)\\
+		 &\text{\textsc{q.e.d.}}
+	\end{align}
+	%
+	%
+	%
+	
+	%
+	%
+	%
+	\item % D
+	%
+	%
+	%
+	The $p$-length vector $z \sim \pN_p(0, I_p)$ follows the standard multivariate normal distribution. We will full prove that the vector $x = Lz + \mu$, where $L$ is a $p \times p$ matrix of full column rank, is multivariate normal. The MGF of $x$ is,
+	%
+	%
+	%
+	\begin{align}
+		M_x(t) &= E\left( \exp \left( t^T x \right) \right) \\
+		&= E\left( \exp \left( t^T(Lz + \mu) \right) \right) \\
+		&= E \left( \exp(t^TLz + t^T \mu) \right) \\
+		&= \exp\left( t^T\mu \right) E \left( \exp(t^TLz) \right) \\
+		&= \exp\left( t^T\mu \right) M_z(t^TL) \\
+		&= \exp\left( t^T\mu \right) \exp\left[ \frac{1}{2} \left( t^TL \right) I_p \left( t^TL \right)^T \right] \\
+		&= \exp\left( t^T\mu + t^T L L^T t / 2\right).
+	\end{align}
+	%
+	%
+	%
+	Therefore $x$ follows a multivariate normal distribution with mean vector $\mu$ and covariance matrix $LL^T$, $x \sim \pN_p \left( \mu, LL^T \right)$.
+	%
+	%
+	%
+	\item % E
+	%
+	%
+	%
+	By definiton, $x = Lz + \mu$ is an affine transformation of a vector of standard normal random variables, $z$. To generate random numbers from $x \sim \pN_p (\mu, \Sigma)$, first perform the Cholesky decomposition of $\Sigma$ to obtain a lower triangle matrix $L$ such that $\Sigma = LL^T$, generate $p$ iid scalar normal random numbers to make the $z$ vector, and finally compute $x = Lz + \mu$.
+	%
+	%
+	%
+	\item % F
+	%
+	%
+	%
+	Before we begin, let us first show that $$\det\left(L^{-1}\right) = \left[\det\left(\Sigma\right)\right]^{-1/2}.$$ This may be shown by 
+	%
+	%
+	%
+	\begin{align*}
+		L^{-1}L &= I \\
+		\det\left( L^{-1}L \right) &= \det\left( I \right) \\
+		\det\left( L^{-1} \right) \det\left( L \right) &= 1 \\
+		\det\left( L^{-1} \right) &= \left[\det(L)\right]^{-1}
+	\end{align*}
+	%
+	%
+	%
+	and 
+	%
+	%
+	%
+	\begin{align*}
+		\Sigma &= LL^T \\
+		\det(\Sigma) &= \det \left(LL^T\right) \\
+		\det(\Sigma) &= \det \left(L\right) \det \left(L^T\right) \\
+		\det(\Sigma) &= \det \left(L\right)^2 \\
+		\left[ \det(\Sigma) \right]^{1/2} &= \det \left(L\right) \\
+		\left[ \det(\Sigma) \right]^{-1/2} &= \left[\det(L)\right]^{-1} \\
+		\left[ \det(\Sigma) \right]^{-1/2} &= \det\left(L^{-1}\right).
+	\end{align*}
+	%
+	%
+	%
+	Now we can derive the PDF of the multivariate normal $x \sim \pN (\mu, \Sigma)$. Define the transformation $f: z \mapsto x$, $x = f(z) = Lz + \mu$, and its inverse transformation, $f^{-1} = g: x \mapsto z$, $z = g(x) = L^{-1}(x - \mu)$, where $z$ follows the standard multivariate distribution. The PDF of $x$ is 
+	%
+	%
+	%
+	\begin{align}
+		f_x(x) &= f_z(g(x))\cdot \left|J(y)\right|,
+	\end{align}
+	%
+	%
+	%
+	where $J(y)$ is the Jacobian determinant of the transformation $g$, which in this case is just $\det\left(L^{-1/2}\right)$,
+	%
+	%
+	%
+	\begin{align}
+		f_x(x) &= (2\pi)^{-p/2}\exp\left( -\frac{1}{2} \left[ L^{-1}(x-\mu) \right]^T \left[ L^{-1}(x-\mu) \right] \right) \left|\det\left(L^{-1}\right)\right| \\
+		&= (2\pi)^{-p/2}\exp\left( -\frac{1}{2}(x-\mu)^T \left(L^{-1}\right)^TL^{-1}(x-\mu) \right) \left[\det\left(\Sigma\right)\right]^{-1/2}\\
+		&= (2\pi)^{-p/2}\left[\det\left(\Sigma\right)\right]^{-1/2}\exp\left( -\frac{1}{2}(x-\mu)^T \left(L^T\right)^{-1}L^{-1}(x-\mu) \right) \\
+		&= (2\pi)^{-p/2}\left[\det\left(\Sigma\right)\right]^{-1/2}\exp\left( -\frac{1}{2}(x-\mu)^T \left(LL^T\right)^{-1}(x-\mu) \right) \\
+		&= (2\pi)^{-p/2}\left[\det\left(\Sigma\right)\right]^{-1/2}\exp\left( -\frac{1}{2}(x-\mu)^T \Sigma^{-1}(x-\mu) \right)
+	\end{align}
+	%
+	%
+	%
+	\item % G
+	%
+	%
+	%
+	Let $x_1 \sim \pN (\mu_1, \Sigma_1)$ independent of $x_2 \sim \pN (\mu_2, \Sigma_2)$, and define $y = Ax_1 + Bx_2$. The MGFs of $x_1$ and $x_2$ are, respectively, 
+	%
+	%
+	%
+	\begin{align}
+		M_{x_1}(s) &= E\left( \exp \left[ s^T x_1 \right] \right) = \exp\left( s^T \mu_1 + s^T \Sigma_1 s /2 \right)\\
+		M_{x_2}(s) &= E\left( \exp \left[ s^T x_2 \right] \right) = \exp\left( s^T \mu_2 + s^T \Sigma_2 s /2 \right).
+	\end{align}
+	%
+	%
+	%
+	We will characterize $y$ by its MGF,
+	%
+	%
+	%
+	\begin{align}
+		M_y(t) &= E\left( \exp \left[ t^T y \right] \right) \\
+		&= E\left( \exp \left[ t^T \left( Ax_1 + Bx_2 \right) \right] \right) \\
+		&= E\left( \exp \left[ t^TAx_1 + t^TBx_2 \right] \right) \\
+		&= E\left( \exp \left[ t^TAx_1 \right] \exp \left[ t^TBx_2 \right] \right) \\
+		&= E\left( \exp \left[ t^TAx_1 \right] \right) E \left( \exp \left[ t^TBx_2 \right] \right) \Leftarrow x_1 \independent x_2 \\
+		&= M_{x_1}(A^Tt) M_{x_2}(B^Tt) \\
+		&= \exp\left( t^TA \mu_1 + t^TA \Sigma_1 A^Tt /2 \right) \exp\left( t^TB \mu_2 + t^TB \Sigma_2 B^Tt /2 \right) \\
+		&= \exp\left( t^TA \mu_1 + t^TA \Sigma_1 A^Tt /2 + t^TB \mu_2 + t^TB \Sigma_2 B^Tt /2 \right) \\
+		&= \exp\left( t^T (A \mu_1 + B \mu_2) + t^T (A \Sigma_1 A^T + B \Sigma_2 B^T) t / 2 \right).
+	\end{align}
+	%
+	%
+	%
+	Therefore, $y\sim \pN(A \mu_1 + B \mu_2, A \Sigma_1 A^T + B \Sigma_2 B^T)$.
+	%
+	%
+	%
+\end{enumerate}
+
+\end{homeworkProblem}
+
+
+R code is shown on the following page.
+
+
+%%----------------------------------------------------------------------------------------
+%%	LIST CODE
+%%----------------------------------------------------------------------------------------
+
+\pagebreak
+% \rscript{homework03.r}{Sample Perl Script With Highlighting}
+\lstinputlisting[language=R]{exercises01.R}
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
