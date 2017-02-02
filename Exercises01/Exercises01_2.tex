@@ -669,10 +669,608 @@
 	%
 \end{enumerate}
 
+\emph{Conditionals and marginals}
+
+\begin{enumerate}[(A)]
+	\item % A
+	%
+	%
+	%
+	Let $x \sim \pN_p(\mu, \Sigma)$ and $x_1$ is a vector of the first $k$ elements of $x$, and $x_2$ is the remaining elements of x. We can also parition $\mu$ and $\Sigma$ into 
+	%
+	%
+	%
+	\begin{align}
+		\mu = (\mu_1, \mu_2)^T \;\;\text{and}\;\; \Sigma = \begin{pmatrix}
+			\Sigma_{11} & \Sigma_{12} \\
+			\Sigma_{21} & \Sigma_{22} \\
+			\end{pmatrix} = \begin{pmatrix}
+			\Sigma_{11} & \Sigma_{12} \\
+			\Sigma_{12}^T & \Sigma_{22} \\
+			\end{pmatrix},
+	\end{align}
+	%
+	%
+	%
+	where $\mu_1$ is a vector of the first $k$ elements of $\mu$, $\mu_2$ is the vector of remaining elements, $\Sigma_{11}$ is a $k\times k$ matrix partition of $\Sigma$, $\Sigma_{22}$ is a $(p-k)\times (p-k)$ matrix partition of $\Sigma$, $\Sigma_{12}$ is a $k \times (p-k)$ matrix partition of $\Sigma$, and $\Sigma_{21}$ is a $(p-k) \times k$. We know that $\Sigma_{21} = \Sigma_{12}^T$ because $\Sigma$ is symmetric. Define the matrix 
+	%
+	%
+	%
+	\begin{align}
+		M &=  \begin{pmatrix}
+			\mathcal{I}_{k} & \mathcal{O}_{k \times (p-k)}
+		\end{pmatrix},
+	\end{align}
+	%
+	%
+	%
+	where $\mathcal{I}_{k}$ is the $k \times k$ identity matrix, and $\mathcal{O}_{k \times (p-k)}$ is the $k \times (p-k)$ matrix of all zero elements. Then,
+	%
+	%
+	%
+	\begin{align}
+		x_1 &= Mx.
+	\end{align}
+	%
+	%
+	%
+	We know from the previous problem that $x_1 \sim \pN_k(M \mu, M \Sigma M^T) = \pN_k(\mu_1, \Sigma_{11})$. This is the marginal distribution of $x_1$.
+	%
+	%
+	%
+	\item % B
+	%
+	%
+	%
+	Let $\Omega = \Sigma^{-1}$ be the inverse covariance matrix, or precision matrix, of $x$, which may be partitioned in the same manner as done to the covariance matrix, 
+	%
+	%
+	%
+	\begin{align}
+		\Omega = \begin{pmatrix}
+					\Omega_{11} & \Omega_{12} \\
+					\Omega_{12}^T & \Omega_{22} \\
+					\end{pmatrix}.
+	\end{align}
+	%
+	%
+	%
+	Now we will derive each block of $\Omega$ is terms of blocks from $\Sigma$, starting with the identity 
+	%
+	%
+	%
+	\begin{align}
+		\Omega &= \Sigma^{-1} \\
+		%
+		%
+		\Sigma \Omega &= \mathcal{I}_{p} \\
+		%
+		%
+		\begin{pmatrix}
+					\Sigma_{11}   & \Sigma_{12} \\
+					\Sigma_{12}^T & \Sigma_{22} \\
+		\end{pmatrix} \begin{pmatrix}
+					\Omega_{11}   & \Omega_{12} \\
+					\Omega_{12}^T & \Omega_{22} \\
+        \end{pmatrix} &= \begin{pmatrix}
+					\mathcal{I}_{k} & \mathcal{O}_{k \times (p-k)} \\
+					\mathcal{O}_{(p-k) \times k} & \mathcal{I}_{p-k} \\
+					\end{pmatrix} \\
+		%
+		%
+		\begin{pmatrix}
+					\Sigma_{11}\Omega_{11} + \Sigma_{12}\Omega_{12}^T  & \Sigma_{11}\Omega_{12} + \Sigma_{12}\Omega_{22} \\
+					\Sigma_{12}^T\Omega_{11} + \Sigma_{22}\Omega_{12}^T & \Sigma_{12}^T\Omega_{12} + \Sigma_{22}\Omega_{22} \\
+		\end{pmatrix} &= \begin{pmatrix}
+					\mathcal{I}_{k} & \mathcal{O}_{k \times (p-k)} \\
+					\mathcal{O}_{(p-k) \times k} & \mathcal{I}_{p-k} \\
+					\end{pmatrix}.	
+	\end{align}
+	%
+	%
+	%
+	From here, we have a system of equations,
+	%
+	%
+	%
+	\begin{align}
+		\Sigma_{11}\Omega_{11}   + \Sigma_{12}\Omega_{12}^T &= \mathcal{I}_{k} \label{num1}\\
+		\Sigma_{11}\Omega_{12}   + \Sigma_{12}\Omega_{22}   &= \mathcal{O}_{k \times (p-k)} \label{num2}\\
+		\Sigma_{12}^T\Omega_{11} + \Sigma_{22}\Omega_{12}^T &= \mathcal{O}_{(p-k) \times k} \label{num3}\\
+		\Sigma_{12}^T\Omega_{12} + \Sigma_{22}\Omega_{22}   &= \mathcal{I}_{p-k} \label{num4}.
+	\end{align}
+	%
+	%
+	%
+	From (\ref{num2}) and  we have,
+	%
+	%
+	%
+	\begin{align}
+		\Sigma_{11}\Omega_{12}   + \Sigma_{12}\Omega_{22}   &= \mathcal{O}_{k \times (p-k)} \\
+		\Omega_{12} &= -\Sigma_{11}^{-1}\Sigma_{12}\Omega_{22}
+	\end{align}
+	%
+	%
+	%
+	and from (\ref{num3}) we have,
+	%
+	%
+	%
+	\begin{align}
+		\Sigma_{12}^T\Omega_{11} + \Sigma_{22}\Omega_{12}^T &= \mathcal{O}_{(p-k) \times k} \\
+		\Omega_{12}^T &= -\Sigma_{22}^{-1}\Sigma_{12}^T\Omega_{11}.
+	\end{align}
+	%
+	%
+	%
+	Now, from (\ref{num1}),
+	%
+	%
+	%
+	\begin{align}
+		\Sigma_{11}\Omega_{11} - \Sigma_{12}\Sigma_{22}^{-1}\Sigma_{12}^T\Omega_{11} &= \mathcal{I}_{k} \\
+		\left( \Sigma_{11} - \Sigma_{12}\Sigma_{22}^{-1}\Sigma_{12}^T \right) \Omega_{11} &= \mathcal{I}_{k}\\
+		\Omega_{11} &=  \left( \Sigma_{11} - \Sigma_{12}\Sigma_{22}^{-1}\Sigma_{12}^T \right)^{-1},
+	\end{align}
+	%
+	%
+	%
+	and from (\ref{num4}),
+	%
+	%
+	%
+	\begin{align}
+		-\Sigma_{12}^T\Sigma_{11}^{-1}\Sigma_{12}\Omega_{22} + \Sigma_{22}\Omega_{22}  &= \mathcal{I}_{p-k} \\
+		\left(\Sigma_{22} -\Sigma_{12}^T\Sigma_{11}^{-1}\Sigma_{12} \right) \Omega_{22} &= \mathcal{I}_{p-k}\\
+		\Omega_{22} &= \left(\Sigma_{22} -\Sigma_{12}^T\Sigma_{11}^{-1}\Sigma_{12} \right)^{-1}.
+	\end{align}
+	%
+	%
+	%
+	We now have all the pieces to write the $\Omega$ is terms of partitions of $\Sigma$,
+	%
+	%
+	%
+	\begin{align}
+		\Omega = \begin{pmatrix}
+					\Omega_{11} & \Omega_{12} \\
+					\Omega_{12}^T & \Omega_{22} \\
+					\end{pmatrix} = \begin{pmatrix}
+					 \left( \Sigma_{11} - \Sigma_{12}\Sigma_{22}^{-1}\Sigma_{12}^T \right)^{-1} & -\Sigma_{11}^{-1}\Sigma_{12}\left(\Sigma_{22} -\Sigma_{12}^T\Sigma_{11}^{-1}\Sigma_{12} \right)^{-1} \\
+					-\Sigma_{22}^{-1}\Sigma_{12}^T  \left( \Sigma_{11} - \Sigma_{12}\Sigma_{22}^{-1}\Sigma_{12}^T \right)^{-1} & \left(\Sigma_{22} -\Sigma_{12}^T\Sigma_{11}^{-1}\Sigma_{12} \right)^{-1} \\
+					\end{pmatrix}.
+	\end{align}
+	%
+	%
+	%
+	\item % C
+	%
+	%
+	%
+	For convenience, define the vector $m$ as
+	\begin{align}
+		m &= x - \mu \\
+		\begin{pmatrix}
+			m_1 \\
+			m_2 \\
+		\end{pmatrix} &= \begin{pmatrix}
+			x_1 \\
+			x_2 \\
+		\end{pmatrix} - \begin{pmatrix}
+			\mu_1 \\
+			\mu_2 \\
+		\end{pmatrix} = \begin{pmatrix}
+			x_1 - \mu_1 \\ 
+			x_2 - \mu_2 \\
+		\end{pmatrix}
+	\end{align}
+	%
+	%
+	%
+	Now we will find the conditional distribution of $x_1$, given $x_2$, which may be found with 
+	%
+	%
+	%
+	\begin{align}
+		f(x_1 | x_2) &= \frac{f(x_1, x_2)}{f(x_2)} \\
+		\log f(x_1 | x_2) &= \log f(x_1, x_2) - \log f(x_2).
+	\end{align} 
+	%
+	%
+	%
+	% First, from the result in section (A) of this problem, we know the marginal distribution $x_2 \sim \pN_{p-k}(\mu_2, \Sigma_{22})$, with corresponding PDF
+	% %
+	% %
+	% %
+	% \begin{align}
+	% 	f_(x_2) &= \exp \left[ - \frac{1}{2} (x-\mu)^T\Sigma^{-1}(x-\mu) \right]
+	% \end{align}
+	%
+	%
+	%
+	Next, note that the joint PDF of $x_1$ and $x_2$ is 
+	%
+	%
+	%
+	\begin{align}
+		f(x_1, x_2) &= f(x) \\
+		&\propto \exp \left[ - \frac{1}{2} (x-\mu)^T\Sigma^{-1}(x-\mu) \right] \\
+		&= \exp \left[ - \frac{1}{2} (x-\mu)^T\Omega(x-\mu) \right].
+	\end{align} 
+	%
+	%
+	%
+	On the log-scale, this becomes 
+	%
+	%
+	%
+	\begin{align}
+		\log f(x_1, x_2) &= - \frac{1}{2} (x-\mu)^T\Omega(x-\mu) \\
+		%
+		%
+		&= - \frac{1}{2} m^T \Omega m \\
+		%
+		%
+		&= - \frac{1}{2} \begin{pmatrix}
+			m_1^T m_2^T \\
+		\end{pmatrix} \begin{pmatrix}
+			\Omega_{11}   & \Omega_{12} \\
+			\Omega_{12}^T & \Omega_{22} \\
+		\end{pmatrix} \begin{pmatrix}
+			m_1 \\
+			m_2 \\
+		\end{pmatrix} \\
+		%
+		%
+		&= - \frac{1}{2} \left( m_1^T \Omega_{11} m_1 + m_2^T \Omega_{12}^T m_1 + m_1^T \Omega_{12}m_1 + m_2^T \Omega_{22} m_2 \right) \\
+		&= - \frac{1}{2} \left( m_1^T \Omega_{11} m_1 + 2 m_2^T \Omega_{12}^T m_1 + m_2^T \Omega_{22} m_2 \right)  \\
+		&= - \frac{1}{2} \left[ (x_1 - \mu_1)^T \Omega_{11} (x_1 - \mu_1) + 2 (x_2 - \mu_2)^T \Omega_{12}^T (x_1 - \mu_1)\right] + C \\
+		&= - \frac{1}{2} \left[ x_1^T \Omega_{11} x_1 - 2\mu_1^T \Omega_{11} x_1 + 2(x_2 - \mu_2)^T \Omega_{12}^T x_1 \right] + C \\
+		&= - \frac{1}{2} \left( x_1^T \Omega_{11} x_1 - 2 \left[ \mu_1^T \Omega_{11} - (x_2 - \mu_2)^T \Omega_{12}^T \right] x_1 \right) + C \label{mess}
+	\end{align}
+	%
+	%
+	%
+	dropping some constants $C$ which do not contain $x_1$. Let $A = \Omega_{11}$ and $b^T = \mu_1^T \Omega_{11} - (x_2 - \mu_2)^T \Omega_{12}^T$, so $b = \Omega_{11} \mu_1 - \Omega_{12} (x_2 - \mu_2)$. Then (\ref{mess}) becomes 
+	%
+	%
+	%
+	\begin{align}
+		\log f(x_1, x_2) &= - \frac{1}{2} \left( x_1^T A x_1 - 2 b^T x_1 \right) + C \\
+		&= - \frac{1}{2} \left( x_1^T A x_1 - 2 b^T x_1 + b^TA^{-1}b - b^TA^{-1}b \right) + C \\
+		&= - \frac{1}{2} \left[ (x_1 - A^{-1}b)^T A (x_1 - A^{-1}b) - b^TA^{-1}b \right] + C \\
+		&= - \frac{1}{2} (x_1 - A^{-1}b)^T A (x_1 - A^{-1}b) + C \\
+		&= - \frac{1}{2} (x_1 - \Omega_{11}^{-1}[\Omega_{11} \mu_1 - \Omega_{12} (x_2 - \mu_2)])^T \Omega_{11} (x_1 - \Omega_{11}^{-1}[\Omega_{11} \mu_1 - \Omega_{12} (x_2 - \mu_2)]) \\
+		&= - \frac{1}{2} (x_1 -  [\mu_1 - \Omega_{11}^{-1}\Omega_{12} (x_2 - \mu_2)])^T \Omega_{11} (x_1 - [\mu_1 - \Omega_{11}^{-1}\Omega_{12} (x_2 - \mu_2)])
+	\end{align}
+	%
+	%
+	%
+	We can see that the conditional distribution of $x_1$ given $x_2$ is 
+	%
+	%
+	% \left( \Sigma_{11} - \Sigma_{12}\Sigma_{22}^{-1}\Sigma_{12}^T \right)^{-1}
+	%
+	\begin{align}
+		x_1 | x_2 &\sim \pN_k \left(\mu_1 - \Omega_{11}^{-1}\Omega_{12} (x_2 - \mu_2), \Omega_{11}^{-1} \right),
+	\end{align}
+	%
+	%
+	%
+	and we can simplify a bit further using the fact that the inverse of a symmetric matrix is also symmetic,
+	%
+	%
+	%
+	\begin{align}
+		\Omega_{11}^{-1}\Omega_{12} &= ((\Omega_{11}^{-1}\Omega_{12})^T)^T \\
+		&= (\Omega_{12}^T \Omega_{11}^{-1})^T \\
+		&= \left ( -\Sigma_{22}^{-1}\Sigma_{12}^T  \left( \Sigma_{11} - \Sigma_{12}\Sigma_{22}^{-1}\Sigma_{12}^T \right)^{-1} \left( \Sigma_{11} - \Sigma_{12}\Sigma_{22}^{-1}\Sigma_{12}^T \right) \right )^T \\
+		&= \left( -\Sigma_{22}^{-1}\Sigma_{12}^T \right)^T \\
+		&= - \Sigma_{12}\Sigma_{22}^{-1},
+	\end{align}
+	%
+	%
+	%
+	so we can finally write the conditional of $x_1$ in terms of partitions of $\mu$ and $\Sigma$ as,
+	%
+	%
+	%
+	\begin{align}
+		x_1 | x_2 &\sim \pN_k \left(\mu_1 + \Sigma_{12}\Sigma_{22}^{-1} (x_2 - \mu_2), \Sigma_{11} - \Sigma_{12}\Sigma_{22}^{-1}\Sigma_{12}^T \right).
+	\end{align}
+	%
+	%
+	%
+\end{enumerate}
+
 \end{homeworkProblem}
 
 
 R code is shown on the following page.
+
+
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 3
+%----------------------------------------------------------------------------------------
+
+
+\begin{homeworkProblem}
+
+\large
+\textbf{Multiple regression: three classical principles for inference}
+\normalsize
+
+\begin{enumerate}[(A)]
+	\item % A
+	\begin{align}
+		y_i &= x_i^T \beta + \epsilon_i, \;\; \epsilon_{i} \iid \pN(0, \sigma^2) \\
+		y &= X\beta + \epsilon, \;\; \epsilon \sim \pN_n(0, \sigma^2I_n)
+	\end{align}
+	\emph{Least squares}
+	%
+	%
+	%
+	\begin{align}
+		\hat{\beta} &= \arg \min_{\beta \in \mathcal{R}^p} \left\{ \sum_{i=1}^n (y_i - x_i \beta) \right\} \\
+		&= \arg \min_{\beta \in \mathcal{R}^p} \left\{ (y-X\beta)^T(y-X\beta) \right\} \\
+		&= \arg \min_{\beta \in \mathcal{R}^p} \left\{ \frac{1}{2} (X\beta - y)^T(X\beta - y) \right\} \\
+		&= \arg \min_{\beta \in \mathcal{R}^p} \left\{ \frac{1}{2} \beta^T X^T X \beta - \beta^TX^Ty + \frac{1}{2} y^Ty \right\} \\
+		&= \arg \min_{\beta \in \mathcal{R}^p} \left\{ \frac{1}{2} \beta^T X^T X \beta - \beta^TX^Ty\right\}.
+	\end{align}
+	%
+	%
+	%
+	Now we find the gradient with respect to $\beta$ of the objective and set it to zero 
+	%
+	%
+	%
+	\begin{align}
+		\nabla_{\beta} \left( \frac{1}{2} \beta^T X^T X \beta - \beta^TX^Ty \right) &= X^TX\hat{\beta} - X^T y = 0 \\
+		\Rightarrow \hat{\beta} &= (X^TX)^{-1}X^Ty
+	\end{align}
+	%
+	%
+	%
+	\emph{Maximum likelihood under Gaussianity}
+	%
+	%
+	%
+	\begin{align}
+		\hat{\beta} &= \arg \max_{\beta \in \mathcal{R}^p} \left\{ \prod_{i=1}^n p(y_i | \beta, \sigma^{2}) \right\} \\
+		&= \arg \max_{\beta \in \mathcal{R}^p}  \left\{ \prod_{i=1}^n \exp \left[ - \frac{1}{2\sigma^{2}} (y_i - x_i^T \beta)^2 \right] \right\} \\
+		&= \arg \max_{\beta \in \mathcal{R}^p} \left\{ \sum_{i=1}^n -\frac{1}{2} (y_i - x_i^T \beta)^2 \right\} \\
+		&= \arg \min_{\beta \in \mathcal{R}^p} \left\{ \sum_{i=1}^n (y_i - x_i^T \beta)^2 \right\},
+	\end{align}
+	%
+	%
+	%
+	so we have the same solution $\hat{\beta} = (X^TX)^{-1}X^Ty$ as from the previous section. \\
+	%
+	
+	%
+	\emph{Method of moments} 
+	%
+	
+	%
+	Assume, without loss of generality, that the sum over all the entries in a feature of $X$, $x_j$, is $E(x_j) = 0$. Further, assume that $\bar{\epsilon} = 0$. We choose a $\hat{\beta}$ such that the sample covariance between the errors and each of the $p$ predictors is exactly zero. For one predictor $j$, the sample covariance is
+	%
+	%
+	%
+	\begin{align}
+		\hat{\text{cov}}(x_j, \epsilon) &= \frac{1}{n-1} \sum_{i=1}^n (x_{ij} - \bar{x}_j)(\epsilon_i - \bar{\epsilon}) \\
+		&= \frac{1}{n-1} \sum_{i=1}^n x_{ij} \epsilon_i  \\
+		&= \frac{1}{n-1} x_j^T \epsilon = 0, \; j \in \{1, 2, \ldots, p\} \\
+		\Rightarrow X^Te &= 0 \\
+		\Rightarrow X^T (y - X\beta) &= 0 \\
+		\Rightarrow \hat{\beta} &= (X^TX)^{-1}X^Ty
+	\end{align}
+	%
+	%
+	%
+	\item % B
+	%
+	%
+	%
+	Define the diagonal matrix $W = \text{diag}(w_1, \ldots, w_n)$, where each $w_i$ is a weight associated with a given observation $y_i$. Now we look for the solution to the minimum weighted least squares problem,
+	%
+	%
+	%
+	\begin{align}
+		\hat{\beta} &= \arg \min_{\beta \in \mathcal{R}^p} \left\{ \sum_{i=1}^n w_i(y_i - x_i^T \beta)^2 \right\} \\
+		&= \arg \min_{\beta \in \mathcal{R}^p} \left\{ (X\beta - y)^TW(X\beta - y) \right\} \\
+		&= \arg \min_{\beta \in \mathcal{R}^p} \left\{ \frac{1}{2} (X\beta - y)^TW(X\beta - y) \right\} \\
+		&= \arg \min_{\beta \in \mathcal{R}^p} \left\{\frac{1}{2} \beta^TWX\beta - \beta^T X^T W y + y^T W y  \right\} \\
+		&= \arg \min_{\beta \in \mathcal{R}^p} \left\{\frac{1}{2} \beta^TWX\beta - \beta^T X^T W y  \right\}
+	\end{align}
+	%
+	%
+	%
+	From here we will take the gradient of the objective function,
+	%
+	%
+	%
+	\begin{align}
+		\nabla_\beta \left( \frac{1}{2} \beta^TWX\beta - \beta^T X^T W y \right) &= X^TWX\hat{\beta} - X^TWy = 0 \\
+		\Rightarrow \hat{\beta} &= (X^TWX)^{-1}X^TWy. 
+	\end{align}
+	%
+	%
+	%
+	We can show that this is the maximum-likelihood solution under heteroscedastic Gaussian error too,
+	%
+	%
+	%
+	\begin{align}
+		\hat{\beta} &= \arg \max_{\beta \in \mathcal{R}^p} \left\{ \prod_{i=1}^n p(y_i | \beta, \sigma_i^{2}) \right\} \\
+		&= \arg \max_{\beta \in \mathcal{R}^p}  \left\{ \prod_{i=1}^n \exp \left[ - \frac{1}{2\sigma_i^{2}} (y_i - x_i^T \beta)^2 \right] \right\} \\
+		&= \arg \max_{\beta \in \mathcal{R}^p} \left\{ \sum_{i=1}^n - \frac{1}{2\sigma_i^2} (y_i - x_i^T\beta)^2 \right\} \\
+		&= \arg \min_{\beta \in \mathcal{R}^p} \left\{ \sum_{i=1}^n \frac{1}{\sigma_i^2} (y_i - x_i^T\beta)^2 \right\}, 
+	\end{align}
+	%
+	%
+	%
+	with the relation of $w_i = \sigma_i^{-2}$. In other words, each observation is weighted by the precision of its residual.
+	%
+	%
+	%
+\end{enumerate}
+
+\end{homeworkProblem}
+
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 4
+%----------------------------------------------------------------------------------------
+
+\pagebreak
+
+\begin{homeworkProblem}
+
+\large
+\textbf{Quantifying uncertainty: some basic ideas}
+\normalsize
+
+\emph{In linear regression}
+%
+%
+%
+\begin{enumerate}[(A)]
+	\item % A
+	%
+	%
+	%
+	As before, we assume $$y = X\beta + \epsilon,\;\; \epsilon \sim \pN(0, \sigma^2 I)$$, so $y \sim \pN(X\beta, \sigma^2 I)$. Our estimate $\hat{\beta} = (X^TX)^{-1}X^Ty$ is a transformation of a multivariate normally distributed variable, $y$, so that means that $\hat{\beta}$ is also normally distributed, specifically,
+	%
+	%
+	%
+	\begin{align}
+		\hat{\beta} &\sim \pN ((X^TX)^{-1}X^TX\beta, (X^TX)^{-1}X^T (\sigma^2 I) ((X^TX)^{-1}X^T)^T) \\
+		&\sim \pN(\beta, \sigma^2 (X^TX)^{-1}X^TX(X^TX)^{-1}) \\
+		&\sim \pN(\beta, \sigma^2(X^TX)^{-1})
+	\end{align} 
+	%
+	%
+	%
+	\item % B
+	%
+	%
+	%
+	We can estimate $\sigma^2$ with an average, taking into account the degrees of freedom $n - p$ after estimating $p$ parameters,
+	%
+	%
+	%
+	\begin{align}
+		\hat{\sigma}^2 &= \frac{1}{n-p} \sum_{i=1}^n (y_i - X\hat{\beta})^2.
+	\end{align}
+	%
+	%
+	%
+	Check the appendix for \textsf{R} code for implementing a linear model for the ozone dataset.
+	%
+	%
+\end{enumerate}
+
+\emph{Propogating uncertainty} 
+
+Now we try to estimate the covariance matrix of the sampling distribution of $\hat{\theta}$:
+%
+%
+%
+\begin{align}
+	\hat{\Sigma} \approx \text{cov} = E \left\{ (\hat{\theta} - \bar{\theta})(\hat{\theta} - \bar{\theta})^T \right\}
+\end{align}
+
+\begin{enumerate}[(A)]
+	\item % A
+	%
+	%
+	%
+	Define the function
+	%
+	%
+	%
+	\begin{align}
+		f(\theta) &= \theta_1 + \theta_2 \\
+		f(\hat{\theta}) &= \hat{\theta}_1 + \hat{\theta}_2.
+	\end{align}
+	%
+	%
+	%
+	We can calculate the standard error of $f(\hat{\theta})$ with 
+	%
+	%
+	%
+	\begin{align}
+		\left( \text{SE}(f(\hat{\theta})) \right)^2 &= \text{var}\left( f(\hat{\theta}) \right) \\
+		&= \text{var}\left( \hat{\theta}_1 + \hat{\theta}_2 \right) \\
+		&= \text{var}(\hat{\theta}_1) + \text{var}(\hat{\theta}_2) + 2\text{cov}(\hat{\theta}_1, \hat{\theta}_2).
+	\end{align}
+	%
+	%
+	%
+	More generally, if we have a function which is a summation of $p$ components of $\theta$,
+	%
+	%
+	%
+	\begin{align}
+		g(\theta) &= \sum_{i=1}^p \theta_{i},
+	\end{align}
+	%
+	%
+	%
+	then the standard error of $g(\hat{\theta})$ will be \\
+	%
+	%
+	%
+	\begin{align}
+		\left( \text{SE}(g(\hat{\theta})) \right)^2 &= \text{var}\left( g(\hat{\theta}) \right) \\
+		&= \sum_{i=1}^p \text{var}(\hat{\theta}_i) + 2 \sum_{i<j} \text{cov}(\hat{\theta}_i, \hat{\theta}_j).
+	\end{align}
+	%
+	%
+	%
+	\item % B
+	%
+	%
+	%
+	Now consider some nonlinear function $f(\theta)$. First, write the first-order Taylor approximation,
+	%
+	%
+	%
+	\begin{align}
+		f(\hat{\theta}) &= f(\theta) + f'(\theta)(\hat{\theta} - \theta) + \mathcal{O}((\hat{\theta}-\theta)^2) \\
+		\text{var}\left\{f(\hat{\theta}\right\} &\approx \text{var}\left\{ f(\theta) + f'(\theta)(\hat{\theta} - \theta) \right\} \\
+		&= (f'(\theta))^2 \cdot \text{var}(\hat{\theta})
+	\end{align}
+	%
+	%
+	%
+\end{enumerate}
+
+
+\emph{Bootstrapping} 
+
+\begin{enumerate}[(A)]
+	\item % A
+	%
+	%
+	%
+	%
+	%
+	%
+	\item % B
+	%
+	%
+	%
+	%
+	%
+	%
+\end{enumerate}
+
+\end{homeworkProblem}
+
 
 
 %%----------------------------------------------------------------------------------------
@@ -681,7 +1279,12 @@ R code is shown on the following page.
 
 \pagebreak
 % \rscript{homework03.r}{Sample Perl Script With Highlighting}
+R code for \texttt{myfuns.R}
+\lstinputlisting[language=R]{myfuns.R}
+\pagebreak
+R code for \texttt{exercises01.R}
 \lstinputlisting[language=R]{exercises01.R}
+
 
 %----------------------------------------------------------------------------------------
 
