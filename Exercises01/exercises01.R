@@ -5,6 +5,7 @@
 library(microbenchmark)
 library(ggplot2)
 library(mlbench)
+library(xtable)
 
 source("myfuns.R")
 
@@ -39,4 +40,19 @@ model2$Beta.p
 ###########################################################
 #### Bootstrapping
 
-BOOT <- my.boot(X, y)
+# Bootstrap estimate of covariance matrix of sampling distribution 
+# of betahat, resampling residuals
+my.cov1 <- my.boot1(X, y)
+xtable(my.cov1, display = rep("e", 11), digits = 2)
+
+# Bootstrap estimate of covariance matrix of sampling distribution 
+# of betahat, resampling pairs x and y
+my.cov2 <- my.boot2(X, y)
+xtable(my.cov2, display = rep("e", 11), digits = 2)
+
+# Parametric estimate of covariance matrix of sampling distribution of betahat
+cov.para <- model2$Var.hat * solve(crossprod(X))
+xtable(cov.para, display = rep("e", 11), digits = 2)
+
+
+# MLE estimation of mean vector and covariance matrix 

@@ -1,0 +1,10 @@
+
+*.gz
+
+*.lb
+
+Exercises01/.Rhistory
+
+*.aux
+
+*.log

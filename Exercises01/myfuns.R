@@ -62,10 +62,9 @@ my.lm <- function(X, y) {
 	return(mylist)
 }
 
-microbenchmark(sqrt(1e9), 1e9^0.5)
-
-my.boot <- function(X, y, NN = 10000){
-	#  Give bootstrapped estimate of covariance matrix of betas 
+my.boot1 <- function(X, y, B = 10000){
+	#  Give bootstrapped estimate of covariance matrix of betas by
+	#  SAMLING **RESIDUALS**
 	#  Note: this function assumes that X already has an intercept term
 	# (or doesn't, if we want to force OLS through the origin)
 	#
@@ -74,8 +73,8 @@ my.boot <- function(X, y, NN = 10000){
 	# y is the response vector
 	# N is the number of bootstrap simulations
 	#
-	# OUTPUTS: 
-	#
+	# OUTPUT: 
+	# cov.star is the estimated covariance matrix of beta-hat 
 	#
 	#
 	#
@@ -93,27 +92,91 @@ my.boot <- function(X, y, NN = 10000){
 	y.hat <- crossprod(t(X), beta.hat)
 	res <- y - y.hat
 	
-	var.hat <- sum(res^2) / (N - p)
-	
 	# Run bootstrap
-	var.hat.star <- c()
-	beta.star <- matrix(nrow = p, ncol = NN)
+	beta.star <- matrix(nrow = B, ncol = p)
 	
-	for(i in 1:NN) {
+	for(i in 1:B) {
 		sample.i <- sample(1:N, N, replace = T)
 		res.star <- res[sample.i]
-		var.hat.star <- c(var.hat.star, sum(res.star^2) / (N - p))
 		
 		y.star <- y.hat + res.star
 		
-		beta.star[, i] <- crossprod(XtXinv, crossprod(X, y.star))
+		beta.star[i, ] <- crossprod(XtXinv, crossprod(X, y.star))
 	}
 	
-	mylist <- list('XtXinv' = XtXinv, 
-				   'var.hat' = var.hat, 
-				   'var.hat.star' = var.hat.star)
+	cov.star <- cov(beta.star)
 	
-	return(mylist)
+	return(cov.star)
+}
+
+my.boot2 <- function(X, y, B = 10000){
+	#  Give bootstrapped estimate of covariance matrix of betas by
+	#  SAMLING **POINTS x & y**
+	#  Note: this function assumes that X already has an intercept term
+	# (or doesn't, if we want to force OLS through the origin)
+	#
+	# INPUTS:
+	# X is the design matrix
+	# y is the response vector
+	# N is the number of bootstrap simulations
+	#
+	# OUTPUT: 
+	# cov.star is the estimated covariance matrix of beta-hat 
+	#
+	#
+	#
+	
+	N <- nrow(X)
+	p <- ncol(X)
+
+	# Run bootstrap
+	beta.star <- matrix(nrow = B, ncol = p)
+	
+	for(i in 1:B) {
+		sample.i <- sample(1:N, N, replace = T)
+		
+		X.star <- X[sample.i, ]
+		y.star <- y[sample.i, ]
+		
+		XtX.star <- crossprod(X.star)
+		
+		beta.star[i, ] <- solve(XtX.star, crossprod(X.star, y.star))
+	}
+	
+	cov.star <- cov(beta.star)
+	
+	return(cov.star)
+}
+
+my.mvn <- function(n, mu, Sigma) {
+	#  Simulate n draws from MVN(mu, Sigma)
+	#  
+	#  Note: this function assumes that X already has an intercept term
+	# (or doesn't, if we want to force OLS through the origin)
+	#
+	# INPUTS:
+	# n is the number of draws
+	# mu is the mean vector
+	# Sigma is the covariance matrix
+	#
+	# OUTPUT: 
+  	# x is matrix of n draws from MVN(mu, Sigma) [with n rows, p columns]
+	#
+	
+	p <- length(mu)
+	
+	if ((nrow(Sigma) != ncol(Sigma)) | (det(Sigma) <= 0) | (nrow(Sigma) != p) ) {
+		return("Try again...")
+	}
+	
+	z     <- matrix(rnorm(n*p), nrow = p)
+	mumat <- matrix(rep(mu, n), nrow = p)
+	
+	Lt <- chol(Sigma)
+	
+	x <- crossprod(Lt, z) + mumat
+	
+	return(t(x))
 }
 
 loglik <- function(X = NULL, y = NULL, params = NULL) {
