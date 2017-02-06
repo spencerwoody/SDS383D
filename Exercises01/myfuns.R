@@ -62,7 +62,7 @@ my.lm <- function(X, y) {
 	return(mylist)
 }
 
-my.boot1 <- function(X, y, B = 10000){
+my.boot.res <- function(X, y, B = 1e4){
 	#  Give bootstrapped estimate of covariance matrix of betas by
 	#  SAMLING **RESIDUALS**
 	#  Note: this function assumes that X already has an intercept term
@@ -109,7 +109,7 @@ my.boot1 <- function(X, y, B = 10000){
 	return(cov.star)
 }
 
-my.boot2 <- function(X, y, B = 10000){
+my.boot.pairs <- function(X, y, B = 1e4){
 	#  Give bootstrapped estimate of covariance matrix of betas by
 	#  SAMLING **POINTS x & y**
 	#  Note: this function assumes that X already has an intercept term
@@ -163,22 +163,109 @@ my.mvn <- function(n, mu, Sigma) {
   	# x is matrix of n draws from MVN(mu, Sigma) [with n rows, p columns]
 	#
 	
+	# dimension of MVN
 	p <- length(mu)
 	
-	if ((nrow(Sigma) != ncol(Sigma)) | (det(Sigma) <= 0) | (nrow(Sigma) != p) ) {
+	# Check if inputs are valid (dimensions match, Sigma is square and p.s.d.)
+	if ( (ncol(Sigma) != p) | (nrow(Sigma) != p) | (max(eigen(Sigma)$values) <= 0) ) {
 		return("Try again...")
 	}
 	
+	# Generate n*p univariate standard normal variables
 	z     <- matrix(rnorm(n*p), nrow = p)
+	
+	# Create a matrix containing copies of mu
 	mumat <- matrix(rep(mu, n), nrow = p)
 	
+	# Decompose Sigma into Sigma = L %*% Lt
 	Lt <- chol(Sigma)
 	
+	# Generate sample with affine transformation of z
 	x <- crossprod(Lt, z) + mumat
 	
 	return(t(x))
 }
 
-loglik <- function(X = NULL, y = NULL, params = NULL) {
-	return(TRUE)
+mle.mvn <- function(x) {
+	# Give MLE estimates of mean vector and covariance matrix 
+	# from a sample from a MVN
+	#
+	# INPUTS:
+	# x is a sample from MVN with unknown mean vector and covariance matrix
+	# (note: each *row* represents one sample from MVN)
+ 	#
+	# OUTPUT: 
+  	# mu.hat is the estimated mean vector
+	# Sigma.hat is the estimated covariance matrix
+	
+	N <- nrow(x)
+	
+	# Estimate of mean vector
+	mu.hat <- colMeans(x)
+	
+	# Estimate of covariance matrix
+	mu.hat.mat <- matrix(rep(mu.hat, N), nrow = N, byrow = T)
+	
+	Sigma.hat <- crossprod(x - mu.hat.mat) / N
+	
+	# Return estimates
+	mylist <- list("mu.hat" = mu.hat, "Sigma.hat" = Sigma.hat)
+	
+	return(mylist)
 }
+
+my.boot.mle <- function(x, B = 1e4) {
+	# Bootstrap MLE estimates of mean vector and covariance matrix 
+	# from a sample from a MVN
+	#
+	# INPUTS:
+	# x is a sample from MVN with unknown mean vector and covariance matrix
+	# (note: each *row* represents one sample from MVN)
+	# B is the number of bootstrap simulations
+ 	#
+	# OUTPUT: 
+  	# mu.hat is the bootstrapped mean (each row is one simulation)
+	# Sigma.boot is bootstrapped covariance (each row is on simulation) (Also, 
+	# 	the first p columns are the p diagonal elements of covariance matrix; 
+	#   the remaining columns are the off-diagonal elements)
+	
+	N <- nrow(x)
+	p <- ncol(x)
+	
+	# Number of distinct elements in covariance matrix (p-th triangular number)
+	numel <- choose(p + 1, 2)
+	
+	# Create empty elements to house bootstrap estimates
+	mu.boot <- matrix(nrow = B, ncol = p)
+	Sigma.boot <- matrix(nrow = B, ncol = numel)
+	
+	for (i in 1:B) {
+		# Choose rows of x
+		sample.i <- sample(1:N, N, replace = T)
+		
+		# Create bootstrapped x
+		x.star <- x[sample.i, ]
+		
+		# Compute MLE of mean and covariance matrix
+		x.star.MLE <- mle.mvn(x.star)
+		
+		# Store result of estimated mean
+		mu.boot[i, ] <- x.star.MLE$mu.hat
+		
+		# Handle each element of covariance matrix
+		Sigma.boot.i <- x.star.MLE$Sigma.hat
+		
+		# Store variances first, which are diagonal elements
+		Sigma.boot[i, 1:p] <- diag(x.star.MLE$Sigma.hat)
+		
+		# Now do off-diagonal elements
+		if (p > 1) {
+			Sigma.boot[i, (p+1):numel] <- Sigma.boot.i[lower.tri(Sigma.boot.i)]
+		}
+	}
+
+	mylist <- list("mu.boot" = mu.boot, "Sigma.boot" = Sigma.boot)
+	
+	return(mylist)
+}
+

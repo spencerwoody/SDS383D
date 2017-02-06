@@ -21,6 +21,7 @@
 \usepackage{inconsolata}
 
 \newcommand{\pN}{\mathcal{N}}
+\newcommand{\tr}{\text{tr}}
 \newcommand{\iid}{\overset{\text{iid}}{\sim}}
 \newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
@@ -1346,7 +1347,7 @@ Now we try to estimate the covariance matrix of the sampling distribution of $\h
 	%
 	\begin{enumerate}[1.]
 		\item % 1
-		We can simulate draws from the multivariate normal distribution with mean vector $\mu$ and covariance matrix $\Sigma$ through the process described in a previous part of this exercise.
+		We can simulate draws from the multivariate normal distribution with mean vector $\mu$ and covariance matrix $\Sigma$ through the process described in a previous part of this exercise. Use the Cholesky decomposition of the covariance matrix into $\Sigma = LL^T$ where $L$ is a lower triangular matrix, generate a sample from the standard multivariate normal distribution (call it $z$) and then $x = Lz + \mu$ comes from the multivariate normal distribution with mean vector $\mu$ and covariance matrix $\Sigma$.
 		%
 		%
 		%
@@ -1354,7 +1355,155 @@ Now we try to estimate the covariance matrix of the sampling distribution of $\h
 		%
 		%
 		%
-		
+		Here we derive the maximum likelihood estimates (MLEs) of the mean vector and convariance matrix, respectively, given a sample from the MVN with $\mu$ and $\Sigma$.
+		%
+		%
+		%
+		The likelihood of the $\pN_p(\mu, \Sigma)$ distribution is,
+		%
+		%
+		%
+		\begin{align}
+			L(\mu, \Sigma | x) &\propto \prod_{i=1}^N \det[\Sigma]^{-1/2} \exp\left[ - \frac{1}{2}(x_i - \mu)^T \Sigma^{-1}(x_i - \mu) \right].
+		\end{align}
+		%
+		%
+		%
+		On a log scale, this becomes
+		%
+		%
+		%
+		\begin{align}
+			\ell(\mu, \Sigma | mu) &= \log L(\mu, \Sigma | x) \\
+			&= - \frac{N}{2}\log \left( \det [\Sigma] \right) - \frac{1}{2}\sum_{i=1}^N (x_i - \mu)^T \Sigma^{-1} (x_i - \mu). 
+		\end{align}
+		%
+		%
+		%
+		We can maximize $\ell(\mu, \Sigma | x)$ with respect to $\mu$, invariant of $\Sigma$, by taking the gradient and setting it zero. Let $\bar{x} = \sum_{i=1}^N x_i / N$. Then,
+		%
+		%
+		%
+		\begin{align}
+			\nabla_\mu \ell(x|\mu, \Sigma) &= \nabla_\mu \left[ - \frac{1}{2}\sum_{i=1}^N (x_i - \mu)^T \Sigma^{-1} (x_i - \mu) \right] \\
+			&= \nabla_\mu \left[ - \frac{1}{2}\sum_{i=1}^N \left( x_i^T \Sigma^{-1} x_i^T - 2 \mu^T \Sigma^{-1} x_i + \mu^T \Sigma^{-1} \mu \right) \right] \\
+			&= \nabla_\mu \left[ - \frac{1}{2}\sum_{i=1}^N \left( x_i^T \Sigma^{-1} x_i^T - 2 \mu^T \Sigma^{-1} x_i + \mu^T \Sigma^{-1} \mu \right) \right] \\
+			&= \nabla_\mu \left[\sum_{i=1}^N \left( \mu^T \Sigma^{-1} x_i - \frac{1}{2} \mu^T \Sigma^{-1} \mu \right) \right] \\
+			&= \sum_{i=1}^N \left( \Sigma^{-1} x_i - \Sigma^{-1} \mu \right) \\
+			&= \Sigma^{-1} (n\bar{x} - n\mu) = 0 \\
+			\Rightarrow \hat{\mu} &= \bar{x} = \frac{1}{N} \sum_{i=1}^N x_i.
+		\end{align}
+		%
+		%
+		%
+		Now we have the MLE for the mean vector. To find the MLE for the covariance matrix, let us first discuss some properties of matrix calculus. Let $A$ be a random $r \times c$ matrix, and index its components by $i$ and $j$ be such that $a_{ij}$ is the element in the $i$th row and $j$th column of $A$. The derivative of a scalar function $g: \mathcal{R}^{r \times c} \mapsto \mathcal{R}^1$ with respect to $A$ is also a $r \times c$ matrix, call it $B$, notated as 
+		\begin{align}
+			B := \frac{\partial}{\partial A} g(A),
+		\end{align}
+		%
+		%
+		%
+		and each element in $B$, $B_{ij}$, is
+		%
+		%
+		%
+		\begin{align}
+			b_{ij} = \frac{\partial}{\partial a_{ij}} g(A).
+		\end{align}
+		%
+		%
+		%
+		Now let us establish two properties. The first is the derivative of a trace of a product of a fixed $c \times r$ matrix $D$ and random $r \times c$ matrix $A$ with respect to $A$, which we can find by using the definition of the matrix product and utilizing the cyclicity property of the trace operator,
+		%
+		%
+		%
+		\begin{align}
+			\frac{\partial}{\partial a_{ij}} \tr [AD] &= \frac{\partial}{\partial a_{ij}}  \sum_{k=1}^r \sum_{l=1}^{c} a_{kl}d_{lk} \\
+			&= d_{ji} \\
+			\Rightarrow \frac{\partial}{\partial A} \tr [AD] &= D^T.
+		\end{align}
+		%
+		%
+		%
+		From this, we can calculate the derivative of a quadratic term $w^T A w$ with respect to $A$,
+		%
+		%
+		%
+		\begin{align}
+			\frac{\partial}{\partial A} w^T A w = \frac{\partial}{\partial A} \tr[w^T A w ] = \frac{\partial}{\partial A} \tr[ww^T A ] = [ww^T]^T = ww^T.
+		\end{align}
+		%
+		%
+		%
+		Next we will show that 
+		%
+		%
+		%
+		\begin{align}
+			\frac{\partial}{\partial A} \log |A| = \left(A^{-1}\right)^T.
+		\end{align}
+		%
+		%
+		%
+		Note that, by the chain rule, 
+		%
+		%
+		%
+		\begin{align}
+			\frac{\partial}{\partial a_{ij}} \log |A| = \frac{1}{|A|} \frac{\partial}{\partial a_{ij}} |A|,
+		\end{align}
+		%
+		%
+		%
+		and remember that the formula for the matrix inverse, from the adjunct matrix (i.e., the inverse of the cofactor matrix) $\tilde{A}$, is
+		%
+		%
+		%
+		\begin{align}
+			A^{-1} = \frac{1}{|A|} \tilde{A},
+		\end{align}
+		%
+		%
+		%
+		which implies that we need only show 
+		%
+		%
+		%
+		\begin{align}
+			\frac{\partial}{\partial a_{ij}} |A| &= \tilde{A}.
+		\end{align}
+		%
+		%
+		%
+		Remember that the determinant of $A$ may be defined recursively as 
+		%
+		%
+		%
+		\begin{align}
+			|A| &= \sum_{j=1}^c (-1)^{i+j} a_{ij}M_{ij}
+		\end{align}
+		%
+		%
+		%
+		for some arbitrary $i$ where $M_{ij}$ is a minor, the determinant of the matrix obtained by removing the $i$th row and $j$th column of $A$. Then we can see that the derivative of $|A|$ with respect to $a_{ij}$ is $(-1)^{i+j} M_{ij}$. The matrix of these values is simply the transpose of the matrix of cofactors, i.e. the adjunct matrix. \textsc{qed}. Finally, using these two properties we can derive the MLE of the covariance matrix by taking the derivative of $\ell(\mu, \Sigma | x)$ with respect to the inverse of the covariance matrix and setting to zero. Then, 
+		%
+		%
+		%
+		\begin{align}
+			\frac{\partial}{\partial \Sigma^{-1}} \ell(\mu, \Sigma | x) &= \frac{\partial}{\partial \Sigma^{-1}} \left[ - \frac{N}{2}\log \left( \det [\Sigma] \right) - \frac{1}{2}\sum_{i=1}^N (x_i - \mu)^T \Sigma^{-1} (x_i - \mu) \right] \\
+			%
+			%
+			&= \frac{\partial}{\partial \Sigma^{-1}} \left( \frac{N}{2}\log \left( \det \left[\Sigma^{-1}\right] \right) - \frac{1}{2}\sum_{i=1}^N \tr \left[(x_i - \mu)^T \Sigma^{-1} (x_i - \mu)\right] \right) \\ 
+			%
+			%
+			&= \frac{\partial}{\partial \Sigma^{-1}} \left( \frac{N}{2}\log \left( \det \left[\Sigma^{-1}\right] \right) - \frac{1}{2}\sum_{i=1}^N \tr \left[(x_i - \mu) (x_i - \mu)^T \Sigma^{-1}\right]   \right) \\
+			%
+			%
+			&= \frac{N}{2} \Sigma - \frac{1}{2} \sum_{i=1}^N (x_i - \mu) (x_i - \mu)^T = 0 \\
+			%
+			%
+			\Rightarrow \hat{\Sigma} &= \frac{1}{N}\sum_{i=1}^N (x_i - \hat{\mu})(x_i - \hat{\mu})^T.
+		\end{align}
 		%
 		%
 		%
@@ -1362,6 +1511,25 @@ Now we try to estimate the covariance matrix of the sampling distribution of $\h
 		%
 		%
 		%
+		We can use the bootstrap method to estimate the sampling distribution of the \emph{estimated} mean vector and covariance matrix. Below we show the results of this method. 
+		%\include{Exercises01_2.tex}
+		%
+		%
+		\begin{figure}[htp!]
+			\centering
+				\includegraphics[scale=0.5]{mu.pdf}
+			\caption{Estimated sampling distribution of mean vector}
+			\label{fig:mufig}
+		\end{figure}
+		%
+		%
+		%
+		\begin{figure}[htp!]
+			\centering
+				\includegraphics[scale=0.5]{Sigma.pdf}
+			\caption{Estimated sampling distribution of covariance matrix}
+			\label{fig:Sigmafig}
+		\end{figure}
 		%
 		%
 		%
