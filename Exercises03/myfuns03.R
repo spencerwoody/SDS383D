@@ -1,7 +1,95 @@
 ###########################################################
-######### Created by Spencer Woody on 04 Feb 2017 #########
+######### Created by Spencer Woody on 11 Feb 2017 #########
 ###########################################################
 
+# ===========================================================================
+# Linear smoothing ==========================================================
+# ===========================================================================
+
+lin.smooth <- function(x.new, x, y, kern.fun, h) {
+	# --------------------------------------------------------------------
+	# Linear smoother for some kernel function 
+	# --------------------------------------------------------------------
+	# INPUTS:
+	# x.new - a new point for which to estimate f(x.new)
+	# x - a vector of covariates from previous observations
+	# y - a vector of responses from previous observations
+	# kern.fun - some kernel function (e.g. Gaussian) 
+	#            *** takes 2 arguments: distance (dist) and bandwidth (h)
+	# h is the bandwidth for the kernel function
+	# --------------------------------------------------------------------
+	# OUTPUT: 
+  	# weights - a vector of weights for a new observation 
+	# --------------------------------------------------------------------
+	
+	weights <- kern.fun(dist = x - x.new, h = h) / h
+	weights <- weights / sum(weights)
+	
+	fit <- crossprod(weights, y)
+	
+	return(fit)
+}
+
+kern.unif <- function(dist, h) {
+	# --------------------------------------------------------------------
+	# Uniform kernel function
+	# --------------------------------------------------------------------
+	# INPUTS:
+	# dist 
+	# h is
+	# Sigma is the covariance matrix
+	# --------------------------------------------------------------------
+	# OUTPUT: 
+  	# kern - the value of the uniform kernel function 
+	# --------------------------------------------------------------------
+	
+	kern <- ( (dist / h) <= 1) / 2
+	
+	return(kern)
+}
+
+kern.norm <- function(dist, h) {
+	# --------------------------------------------------------------------
+	# Gaussian (normal) kernel function
+	# --------------------------------------------------------------------
+	# INPUTS:
+	# dist the distance
+	# h is
+	# Sigma is the covariance matrix
+	# --------------------------------------------------------------------
+	# OUTPUT: 
+  	# kern is the value of the Gaussian kernel function 
+	# --------------------------------------------------------------------
+	
+	kern <- 1 / sqrt(2 * pi) * exp(-dist^2 / 2)
+	
+	return(kern)
+}
+
+sprintf("Be sure to ")
+
+make.noise <- function(x, f, res.fun) {
+	# --------------------------------------------------------------------
+	# Simulate noisy data from some non-linear function
+	# --------------------------------------------------------------------
+	# INPUTS:
+	# x - the number of points from noisy distribution
+	# f - a function for the expected value, E(y) = f(x)
+	# res.fun - a mean-zero function for the distribution of residuals
+	#           (e.g. rnorm(), etc.)
+	# --------------------------------------------------------------------
+	# OUTPUT: 
+  	# noise - the simulated data
+	# --------------------------------------------------------------------
+	
+	noise <- f(x) + res.fun(n = length(x))
+	
+	return(noise)
+}
+
+# ===========================================================================
+# Gaussian process ==========================================================
+# ===========================================================================
 
 my.mvn <- function(n, mu, Sigma) {
 	#  Simulate n draws from MVN(mu, Sigma)
