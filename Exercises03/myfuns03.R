@@ -43,7 +43,7 @@ kern.unif <- function(dist, h) {
   	# kern - the value of the uniform kernel function 
 	# --------------------------------------------------------------------
 	
-	kern <- ( (dist / h) <= 1) / 2
+	kern <- ( abs(dist / h) <= 1) / 2
 	
 	return(kern)
 }
@@ -54,38 +54,90 @@ kern.norm <- function(dist, h) {
 	# --------------------------------------------------------------------
 	# INPUTS:
 	# dist the distance
-	# h is
+	# h is the bandwidth
 	# Sigma is the covariance matrix
 	# --------------------------------------------------------------------
 	# OUTPUT: 
   	# kern is the value of the Gaussian kernel function 
 	# --------------------------------------------------------------------
 	
-	kern <- 1 / sqrt(2 * pi) * exp(-dist^2 / 2)
+	kern <- 1 / sqrt(2 * pi) * exp(-(dist / h)^2 / 2)
 	
 	return(kern)
 }
 
-sprintf("Be sure to ")
-
-make.noise <- function(x, f, res.fun) {
+make.noise <- function(x, f, res.dist, sd = NA, scale = NA, df = NA) {
 	# --------------------------------------------------------------------
-	# Simulate noisy data from some non-linear function
+	# Simulate noisy response from some non-linear function
 	# --------------------------------------------------------------------
 	# INPUTS:
-	# x - the number of points from noisy distribution
-	# f - a function for the expected value, E(y) = f(x)
-	# res.fun - a mean-zero function for the distribution of residuals
-	#           (e.g. rnorm(), etc.)
+	# x - the predictor values
+	# f - a function for the expected value, E(y | x) = f(x)
+	# res.dist - a string for distribution of errors, either
+	#            "normal" for normal errors, or 
+	#            "cauchy" for cauchy error
+	# sd - the standard deviation for residuals (for normal errors only)
+	# scale - the scale paramater for residuals (for cauchy errors only)
 	# --------------------------------------------------------------------
 	# OUTPUT: 
-  	# noise - the simulated data
+  	# noise - the simulated noisy responses
 	# --------------------------------------------------------------------
 	
-	noise <- f(x) + res.fun(n = length(x))
+	if (res.dist == "normal" & !is.na(sd)) {
+		noisy <- f(x) + rnorm(n = length(x), mean = 0, sd = sd)
+	} else if (res.dist == "cauchy" & !is.na(scale)) {
+		noisy <- f(x) + rcauchy(n = length(x), location = 0, scale = scale)
+	} else {
+		stop(paste("Must give res.dist argument as ", 
+			  "either \"normal\" or \"cauchy\", AND ",
+			  "also specify sd (for normal) or ", 
+			  "scale (for cauchy)", sep = ""))
+	}
 	
-	return(noise)
+	return(noisy)
 }
+
+# ===========================================================================
+# Cross-validation ==========================================================
+# ===========================================================================
+
+cv <- function(x.tr, y.tr, x.te, y.te, KERN.FUN, h) {
+	# --------------------------------------------------------------------
+	# Give cross validation mean squared prediction error 
+	# --------------------------------------------------------------------
+	# INPUTS:
+	# x.tr - vector of predictors in * training * set
+	# y.tr - vector of responses in * training * set
+	# x.tr - vector of predictors in * testing * set
+	# y.tr - vector of responses in * testing * set
+	# kern.fun - some kernel function (e.g. Gaussian) 
+	#            *** takes 2 arguments: distance (dist) and bandwidth (h)
+	# h - vector or bandwidths
+	# --------------------------------------------------------------------
+	# OUTPUT: 
+  	# mse - mean square predictive error
+	# --------------------------------------------------------------------
+	
+	numbands <- length(h)
+	mse <- rep(NA, numbands)
+	
+	for (i in 1:numbands) {
+		y.pr <- sapply(
+			x.te, 
+			lin.smooth, 
+			x = x.tr, 
+			y = y.tr, 
+			kern.fun = KERN.FUN, 
+			h = h[i]
+			)
+			
+		mse[i] <- mean((y.te - y.pr)^2)
+	}
+	
+	return(mse)
+}
+
+
 
 # ===========================================================================
 # Gaussian process ==========================================================

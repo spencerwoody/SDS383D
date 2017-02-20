@@ -55,11 +55,8 @@ p <- ncol(X)
 
 # Hyperparameters: K = diag(k1, k2), Lambda, d, eta, m
 
-k1 <- 0.01
-k2 <- 0.01
-
 m <- matrix(rep(0, p), ncol = 1)
-K <- diag(k1, p)
+K <- diag(0.01, p)
 
 Lambda <- diag(n)
 
@@ -67,7 +64,7 @@ d <- 0.02
 eta <- 0.02
 
 # For heavy tails only
-h <- 0.02
+h <- 2
 
 
 # Fit non-heavy tail regression
@@ -126,13 +123,38 @@ lambda.post <- lambda.post[-(1:burn), ]
 
 lambdas <- colMeans(lambda.post)
 
-plot(sort(1 / lambdas), 
-ylab = "1 / lambda")
+# Plot the lambdas
+plot(sort(1 / lambdas), ylab = "1 / lambda")
 
 # Mean posterior for betas
-m.star2 <- colMeans(beta.post)
+m.star2 <- matrix(colMeans(beta.post), ncol = 1)
+rownames(m.star2) <- rownames(m.star)
 
+# Frequentist
 
+freq.lm <- my.lm(X, y)
+freq.beta <- freq.lm$Beta.hat
+
+freq.est <- matrix(freq.beta, ncol = 1)
+freq.est
+
+# Non-heavy tail Bayes
 m.star 
+
+# Heavy tail Bayes
 m.star2
 
+# Compare these estimates
+comp <- cbind(freq.est, m.star, m.star2)
+rownames(comp) <- rownames(m.star)
+comp
+
+plot(X %*% m.star, y)
+abline(0, 1)
+
+hist(y - X %*% m.star)
+
+plot(X %*% m.star2, y)
+abline(0, 1)
+
+hist(y - X %*% m.star2)

@@ -174,7 +174,7 @@
 \begin{homeworkProblem}
 
 \large
-\textbf{Basics}
+\textbf{Basic Concepts}
 \normalsize
 
 
@@ -200,10 +200,109 @@
 
 % To have just one problem per page, simply put a \clearpage after each problem
 
+\pagebreak
+
 \begin{homeworkProblem}
 
 \large
-\textbf{In nonparametric regression and spatial smoothing}
+\textbf{Curve fitting by linear smoothing}
+\normalsize
+
+In this problem, consider a general nonlinear regression with one predictor and one response, $y_i = f(x_i) + \epsilon_i$, where $\epsilon_i$ are mean-zero random variables.
+
+\begin{enumerate}[(A)]
+	\item % A
+	%
+	%
+	%
+	For now, consider a linear regression on a response $y_i$ with one predictor $x_i$, and both $y_i$ and $x_i$ have had their means subtracted, so the $y_i = \beta x_i + \epsilon_i$. Define $S_x := \sum_{i=1}^n x_i^2.$ The least squares estimate for the coefficient, from Exercises 1, is 
+	%
+	%
+	%
+	\begin{align*}
+		\hat{\beta} &= (X^TX)^{-1}X^Ty \\
+			 		&= (x^Tx)^{-1}x^T y \\
+					&= \frac{\sum_{i=1}^n x_i \cdot y_i}{\sum_{i=1}^n x_i^2} \\
+					&= \frac{\sum_{i=1}^n x_i \cdot y_i}{S_x} \\ 
+					&= \sum_{i=1}^n \frac{x_i}{S_x} \cdot y_i.
+	\end{align*}
+	%
+	%
+	%
+	So now our prediction $y^\star | x^\star$ is, 
+	%
+	%
+	%
+	\begin{align*}
+		\hat{y}^\star &= \hat{f}(x^\star) \\
+		&= \hat{\beta}x^\star \\
+		&= \left( \sum_{i=1}^n \frac{x_i}{S_x} \cdot y_i \right) \cdot x^\star \\
+		&= \sum_{i=1}^n \left( \frac{x_i}{S_x} \cdot x^\star \right) \cdot y_i,
+	\end{align*}
+	%
+	%
+	%
+	which we recognize as being in the form of the general \emph{linear smoother}
+	%
+	%
+	%
+	\begin{align*}
+		\hat{f}\left( x^\star \right) &= \sum_{i=1}^n w(x_i, x^\star) \cdot y_i
+	\end{align*}
+	%
+	%
+	%
+	for some weight function $w(x_i, x^\star)$. In particular, the weight function for linear regression gives weight to each $y_i$ proportional to the value of $x_i$. Contrast this with the $k$-nearest neighbors smoothing weight function,
+	%
+	%
+	%
+	\begin{align*}
+		w_K(x_i, x^\star) &= \begin{cases}
+			1/K & \text{if } x_i \text{ is one of the K closest sample points to } x^\star \\
+			0 & \text{otherwise} 
+		\end{cases},
+	\end{align*}
+	%
+	%
+	%
+	which gives \emph{equal} weight to $y_i$s but \emph{only} to the $k$-nearest neighbors of $x^\star$.
+	%
+	%
+	%
+	\item % B
+	%
+	%
+	%
+	Now we have the very general weight function
+	%
+	%
+	%
+	\begin{align*}
+		w(x_i, x^\star) &= \frac{1}{h} \cdot K\left( \frac{x_i - x^\star}{h}, \right)
+	\end{align*}
+	%
+	%
+	%
+	where $K(\bullet)$ is some kernel function. The script \texttt{myfuns03.R} in the appendix shows an \textsf{R} function for linear smoothing, as well functions for the uniform and Gaussian kernels.
+	%
+	%
+	%
+\end{enumerate}
+
+\end{homeworkProblem}
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 3
+%----------------------------------------------------------------------------------------
+
+\pagebreak
+
+% To have just one problem per page, simply put a \clearpage after each problem
+
+\begin{homeworkProblem}
+
+\large
+\textbf{Cross validation}
 \normalsize
 
 
@@ -218,13 +317,92 @@
 	%
 \end{enumerate}
 
+\end{homeworkProblem}
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 4
+%----------------------------------------------------------------------------------------
+
+\pagebreak
+
+% To have just one problem per page, simply put a \clearpage after each problem
+
+\begin{homeworkProblem}
+
+\large
+\textbf{Local polynomial regression}
+\normalsize
 
 
+\begin{enumerate}[(A)]
+	\item % A
+	%
+	%
+	%
+	%
+	%
+	%
+	%
+\end{enumerate}
+
+\end{homeworkProblem}
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 5
+%----------------------------------------------------------------------------------------
+
+\pagebreak
+
+% To have just one problem per page, simply put a \clearpage after each problem
+
+\begin{homeworkProblem}
+
+\large
+\textbf{Gaussian processes}
+\normalsize
+
+
+\begin{enumerate}[(A)]
+	\item % A
+	%
+	%
+	%
+	%
+	%
+	%
+	%
+\end{enumerate}
 
 \end{homeworkProblem}
 
 
+%----------------------------------------------------------------------------------------
+%	PROBLEM 6
+%----------------------------------------------------------------------------------------
 
+\pagebreak
+
+% To have just one problem per page, simply put a \clearpage after each problem
+
+\begin{homeworkProblem}
+
+\large
+\textbf{In nonparametric regression and spacial smoothing}
+\normalsize
+
+
+\begin{enumerate}[(A)]
+	\item % A
+	%
+	%
+	%
+	%
+	%
+	%
+	%
+\end{enumerate}
+
+\end{homeworkProblem}
 
 
 %%----------------------------------------------------------------------------------------
