@@ -20,6 +20,7 @@
 \usepackage{inconsolata}
 
 \newcommand{\pN}{\mathcal{N}}
+\newcommand{\R}{\textsf{R} }
 \newcommand{\iid}{\overset{\text{iid}}{\sim}}
 \newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
@@ -283,7 +284,16 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	%
-	where $K(\bullet)$ is some kernel function. The script \texttt{myfuns03.R} in the appendix shows an \textsf{R} function for linear smoothing, as well functions for the uniform and Gaussian kernels.
+	where $K(\bullet)$ is some kernel function. The script \texttt{myfuns03.R} in the appendix shows an \textsf{R} function for linear smoothing, as well functions for the uniform and Gaussian kernels. Figure \ref{fig:firstexample} shows an example of smoothing with a bandwidth of 0.75 for a cubic function $f(x)$ with iid residuals from the $\pN(0, 15^2)$ distribution. 
+	%
+	%
+	%
+	\begin{figure}[htp!]
+		\centering
+			\includegraphics[scale=0.5]{firstexample.pdf}
+		\caption{Uniform and Gaussian kernel smoothing for $y=f(x) + e$, $f(x) = x(x-4)(x+4)$, $h=0.75$}
+		\label{fig:firstexample}
+	\end{figure}
 	%
 	%
 	%
@@ -311,7 +321,41 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	%
+	See attached \R code for a script to return prediction error estimates for smoothing given a specified choice of bandwidth, $h$.
 	%
+	%
+	%
+	\item
+	%
+	%
+	%
+	For this exercise, I produced 500 data points on the $x$-space $[0, 1]$ from a sine function $f(x)$ with a given period and set the amplitude, and added Gaussian noise with a given standard deviation. Then I used 5-fold cross validation to select the optimal bandwidth for that given period and standard deviation of noise term. Figure \ref{fig:heatmap} shows the optimal bandwidths for period ranging from 0.1 to 1, and standard deviation ranging from 0.001 to 0.5, and Figure \ref{fig:2x2} shows four example The highest bandwidths are chosen for functions with high ``wigglyness'' and high noise, and the smallest bandwidths are chosen for functions with low ``wigglyness'' and low noise. This makes sense. As the frequency increases (i.e., period decreases) then we need a tighter bandwidth because the value of the function is fluctuating at a greater rate. As noise increases, we need a greater bandwidth to smooth out the noise. Furthermore, we can see that in all cases we recover the underlying function pretty well.
+	%
+	%
+	%
+	\begin{figure}[htp!]
+		\centering
+			% \includegraphics[scale=0.5]{opth3.pdf}
+		\caption{Optimal bandwidths for varying periods and standard deviations}
+		\label{fig:heatmap}
+	\end{figure}
+	%
+	%
+	%
+	\begin{figure}[htp!]
+		\centering
+			\includegraphics[scale=0.5]{2x2.pdf}
+		\caption{$2\times2$ example with fitted curves}
+		\label{fig:2x2}
+	\end{figure}
+	%
+	%
+	%
+	\item % LOOCV
+	%
+	%
+	%
+	I'll get around to this eventually\ldots.
 	%
 	%
 	%
@@ -325,8 +369,6 @@ In this problem, consider a general nonlinear regression with one predictor and 
 
 \pagebreak
 
-% To have just one problem per page, simply put a \clearpage after each problem
-
 \begin{homeworkProblem}
 
 \large
@@ -336,6 +378,95 @@ In this problem, consider a general nonlinear regression with one predictor and 
 
 \begin{enumerate}[(A)]
 	\item % A
+	%
+	%
+	%
+	Define
+	%
+	%
+	%
+	\begin{align}
+		g_x(u; a) &= a_0 + \sum_{k=1}^D a_k (u - x)^k \\
+		&= \begin{cases}
+			\sum_{j=0}^{D+1} a_j (u - x)^j &\;\text{ if } u \neq x \\
+			a_0 &\;\text{ if } u = x
+		\end{cases}.
+	\end{align}
+	%
+	%
+	%
+	The coefficients of $a$ will come from the weighted least squares problem 
+	%
+	%
+	%
+	\begin{align}
+		\hat{a} &= \arg \min_{a \in \mathcal{R}^{D+1}} \sum_{i=1}^n w_i \left[y_i - g_x(x_i, a) \right]^2
+	\end{align}
+	%
+	%
+	%
+	Furthermore, define the matrix $R_x$ whose $(i, j)$ element is $(x_i - x)^2$. Then the estimate $\hat{f}(x)$ will be $R_x \hat{a}$. The solution of $\hat{a}$ may be found with 
+	%
+	%
+	%
+	\begin{align*}
+		\hat{a} &= \arg \min_{a \in \mathcal{R}^{D+1}} (y - R_x a)^T W (y - R_x a) \\
+		&= (R_x^T W R_x)^{-1}R_x^TWy
+	\end{align*}
+	%
+	%
+	%
+	where $W = \text{diag}(w_1, \ldots, w_n)$ following the same argument to find the WLS estimate of linear regression from Exercises 1.
+	%
+	%
+	%
+	\item % B
+	%
+	%
+	%
+	%
+	%
+	%
+	%
+	\item % C
+	%
+	%
+	%
+	%
+	%
+	%
+	%
+	\item % D
+	%
+	%
+	%
+	With $H$ a smoothing matrix (or ``hat matrix''), let $r = y - Hy$ be the vector of residuals. If the random vector $x$ with mean vector $\mu$ and covariance matrix $\Sigma$, then $E(x^TQx) = \text{tr}(Q\Sigma) + \mu^T Q \mu$. Then, 
+	%
+	%
+	%
+	\begin{align*}
+		E \left( || r^2 || \right) &= E \left( (y - Hy)^T(y-Hy) \right)
+	\end{align*}
+	%
+	%
+	%
+	\item % E
+	%
+	%
+	%
+	%
+	%
+	%
+	%
+	\item % F
+	%
+	%
+	%
+	%
+	%
+	%
+	%
+	\item % G
 	%
 	%
 	%

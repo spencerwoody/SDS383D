@@ -11,7 +11,7 @@ lin.smooth <- function(x.new, x, y, kern.fun, h) {
 	# Linear smoother for some kernel function 
 	# --------------------------------------------------------------------
 	# INPUTS:
-	# x.new - a new point for which to estimate f(x.new)
+	# x.new - a single new point for which to estimate f(x.new)
 	# x - a vector of covariates from previous observations
 	# y - a vector of responses from previous observations
 	# kern.fun - some kernel function (e.g. Gaussian) 
@@ -108,9 +108,9 @@ cv <- function(x.tr, y.tr, x.te, y.te, KERN.FUN, h) {
 	# INPUTS:
 	# x.tr - vector of predictors in * training * set
 	# y.tr - vector of responses in * training * set
-	# x.tr - vector of predictors in * testing * set
-	# y.tr - vector of responses in * testing * set
-	# kern.fun - some kernel function (e.g. Gaussian) 
+	# x.te - vector of predictors in * testing * set
+	# y.te - vector of responses in * testing * set
+	# KERN.FUN - some kernel function (e.g. Gaussian) 
 	#            *** takes 2 arguments: distance (dist) and bandwidth (h)
 	# h - vector or bandwidths
 	# --------------------------------------------------------------------
@@ -137,7 +137,34 @@ cv <- function(x.tr, y.tr, x.te, y.te, KERN.FUN, h) {
 	return(mse)
 }
 
+# ===========================================================================
+# Local polynomial regression ===============================================
+# ===========================================================================
 
+loc.lin <- function(x.new, x, y, h) {
+	# --------------------------------------------------------------------
+	# Give local linear estimator at some new point with Gaussian kernel
+	# --------------------------------------------------------------------
+	# INPUTS:
+	# x.new is some new point on x
+	# x.vec - vector of x in sample
+	# y.vec - vector of y in sample
+	# h - bandwidth
+	# --------------------------------------------------------------------
+	# OUTPUT: 
+  	# fit - the estimated value of f at x using local linear estimator
+	# --------------------------------------------------------------------	
+	
+	kern.x <- kern.norm(x.new - x.vec, h)
+	
+	s1 <- sum(kern.x * (x - x.new))
+	s2 <- sum(kern.x * (x - x.new)^2)
+	w.x <- kern.x * (s2 * x.new - s1 * (x - x.new))
+	
+	fit <- crossprod(w.x, y.vec) / sum(w.x)
+	
+	return(fit)
+}
 
 # ===========================================================================
 # Gaussian process ==========================================================

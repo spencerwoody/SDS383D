@@ -3,13 +3,15 @@
 ###########################################################
 
 library(ggplot2)
+library(reshape2)
+library(gridExtra)
 library(wesanderson) # nice palettes
 
 # Prep color palette
-pal <- wes_palette("Zissou", 5)
-col1 <- pal[5]
-col2 <- pal[4]
-col3 <- pal[1]
+# pal <- wes_palette("Zissou", 5)
+# col1 <- pal[5]
+# col2 <- pal[4]
+# col3 <- pal[1]
 
 col1 <- "red"
 col2 <- "orange"
@@ -18,41 +20,25 @@ col3 <- "blue"
 source("myfuns03.R")
 
 # ===========================================================================
-# Linear smoothers ==========================================================
+# Linear smoothers (part one) ===============================================
 # ===========================================================================
 
-period <- 0.25
-
+# nonlinear function f(x)
 f1 <- function(x){
-	return(sin(x * 2*pi / period ))
+	return(x * (x - 4) * (x + 4))
 }
-
-# # nonlinear function f(x)
-# f1 <- function(x){
-# 	return(x * (x - 4) * (x + 4))
-# }
 
 # Predictor vector
 x1 <- seq(-5, 5, length.out = 40)
 
-# Sample size
-N = 200
-
-# Set limits of x-space
-xlo = 0
-xhi = 1
-
-# Draw uniformly across this space
-x1 <- (xhi - xlo) * runif(500) + xlo
-
 # Create sequence along x-space
-x.seq <- seq(xlo, xhi, length.out = 200)
+x.seq <- seq(min(x1), max(x1), length.out = 200)
 
 # Response vector
-y1 <- make.noise(x1, f1, "normal", sd = 1/2)
+y1 <- make.noise(x1, f1, "normal", sd = 15)
 
 # Bin width
-h1 <- 0.01436364
+h1 <- 0.75
 
 # Gaussian kernel smoothing
 y.norm <- sapply(
@@ -76,18 +62,279 @@ y.unif <- sapply(
 
 # Make a nice plot
 h <- qplot(x.seq, geom = "blank") +
-xlab(expression(paste("Temperature (",degree,"C)"))) +
+xlab("x") +
 ylab("y") +
-ggtitle("Smoothing functions") +
+ggtitle(sprintf("Smoothing of cubic function")) +
 geom_point(aes(x = x1, y = y1), pch = 1) + 
 stat_function(fun = f1, col = col1, linetype = "dashed") + 
 geom_line(aes(y = y.norm, colour = "Gaussian kernel")) +
 geom_line(aes(y = y.unif, colour = "Uniform kernel")) + 
 scale_colour_manual(name = "Smoother", values = c(col3, col2)) +
-theme(legend.position = c(0.15, 0.15),
+theme(legend.position = c(0.25, 0.15),
 	text = element_text(family="Helvetica"))
 
 h
+
+pdf("firstexample.pdf")
+h
+dev.off()
+
+# ===========================================================================
+# Linear smoothers (cross validation) ==== make big heat map ================
+# ===========================================================================
+
+# Sample size
+N = 500
+
+# Set limits of x-space
+xlo = 0
+xhi = 1
+
+# Number of bins for cross-validation
+numbins <- 5
+
+# Vector for bandwidths to search over
+h.vec <- seq(0.001, 0.125, length.out = 100)
+
+# Vector for standard deviations
+s.vec <- seq(0.001, 0.5, length.out = 100)
+s.vec <- rev(s.vec)
+
+# Vector for periods
+p.vec <- seq(0.1, 1, length.out = 100)
+
+# Matrix for optimal bandwidth values
+opt.h <- matrix(nrow = length(p.vec), ncol = length(s.vec)) 
+
+for (i in 1:length(p.vec)) {
+	# Select what the period is for this iteration
+	p.i <- p.vec[i]
+	
+	# Create a new function with this current period
+	mysin.i <- function(x) {
+		return(sin(x * 2*pi / p.i))
+	}
+	
+	for (j in 1:length(s.vec)) {
+		# Select what the residual sd is for this iteration
+		s.j <- s.vec[j]
+		
+		# Generate data
+		x.ij <- (xhi - xlo) * runif(N) + xlo
+		y.ij <- make.noise(x.ij, mysin.i, "normal", sd = s.j)
+		
+		# Prepare mse matrix for this current iteration
+		mse.ij <- matrix(nrow = numbins, ncol = length(h.vec))
+		
+		# Create random partition into five bins
+		jumble <- sample(1:N, N, replace = F)
+		bin.indices <- split(jumble, cut(1:N, numbins))
+		
+		for (bin in 1:numbins) {
+			my.indices <- bin.indices[[bin]]
+			x.tr <- x.ij[-(my.indices)]
+			y.tr <- y.ij[-(my.indices)]
+			x.te <- x.ij[my.indices]
+			y.te <- y.ij[my.indices]
+			mse.ij[bin, ] <- cv(x.tr, y.tr, x.te, y.te, kern.norm, h.vec)
+		}
+		
+		# Average out MSE over all bins
+		mse.vec <- colMeans(mse.ij)
+		
+		# Choose bandwidth with lowest average MSE
+		opt.h[i, j] <- h.vec[which.min(mse.vec)]
+		
+	}
+	print(i)
+}
+
+# Check to make sure optimal bandwidths look OK
+opt.h / max(opt.h)
+
+# Plot these things
+ohm <- melt(opt.h)
+
+w <- ggplot(ohm, aes(rev(Var1), Var2, z = value)) +
+ggtitle("Picking Optimal Bandwidth for Gaussian Kernel Smoothing (5-fold CV)") + 
+xlab("Decreasing standard deviation (0.5:0.001) (less noisy)") +
+ylab("Decreasing period (1:0.1) (more wiggly)") +
+geom_tile(aes(fill = value)) +
+scale_fill_distiller("Bandwidth", palette = "Spectral")
+w
+
+# Save this to PDF
+pdf("opth3.pdf", width = 7, height = 6)
+w
+dev.off()
+
+
+
+# ===========================================================================
+# Linear smoothers (cross validation) ==== make 2 x 2 plot ==================
+# ===========================================================================
+
+# Sample size
+N = 500
+
+# Set limits of x-space
+xlo = 0
+xhi = 1
+
+# Number of bins for cross-validation
+numbins <- 5
+
+# Vector for bandwidths to search over
+h.vec <- seq(0.001, 0.125, length.out = 100)
+
+# Vector for standard deviations
+# s.vec <- seq(0.001, 0.5, length.out = 64)
+s.vec <- c(0.1, 0.5)
+
+# Vector for periods
+# p.vec <- seq(0.1, 1, length.out = 64)
+p.vec <- c(0.125, 1)
+
+# Matrix for optimal bandwidth values
+opt.h <- matrix(nrow = length(p.vec), ncol = length(s.vec)) 
+
+# Matrix for random x-values and y-values
+x.mat <- matrix(nrow = nrow(opt.h) * ncol(opt.h), ncol = N)
+y.mat <- matrix(nrow = nrow(opt.h) * ncol(opt.h), ncol = N)
+
+# Matrix for values of f at x
+x.seq <- seq(xlo, xhi, length.out = 200)
+fx.mat <- matrix(nrow = nrow(opt.h) * ncol(opt.h), ncol = length(x.seq))
+smooth <- matrix(nrow = nrow(opt.h) * ncol(opt.h), ncol = length(x.seq))
+
+count <- 1
+
+for (i in 1:length(p.vec)) {
+	# Select what the period is for this iteration
+	p.i <- p.vec[i]
+	
+	# Create a new function with this current period
+	mysin.i <- function(x) {
+		return(sin(x * 2*pi / p.i))
+	}
+	
+	for (j in 1:length(s.vec)) {
+		# Select what the residual sd is for this iteration
+		s.j <- s.vec[j]
+		
+		x.ij <- (xhi - xlo) * runif(N) + xlo
+		y.ij <- make.noise(x.ij, mysin.i, "normal", sd = s.j)
+		
+		fx.mat[count, ] <- mysin.i(x.seq)
+		
+		x.mat[count, ] <- x.ij
+		y.mat[count, ] <- y.ij
+		
+		mse.ij <- matrix(nrow = numbins, ncol = length(h.vec))
+		
+		jumble <- sample(1:N, N, replace = F)
+		bin.indices <- split(jumble, cut(1:N, numbins))
+		
+		for (bin in 1:numbins) {
+			my.indices <- bin.indices[[bin]]
+			x.tr <- x.ij[-(my.indices)]
+			y.tr <- y.ij[-(my.indices)]
+			x.te <- x.ij[my.indices]
+			y.te <- y.ij[my.indices]
+			mse.ij[bin, ] <- cv(x.tr, y.tr, x.te, y.te, kern.norm, h.vec)
+		}
+		
+		mse.vec <- colMeans(mse.ij)
+		
+		# Choose first 4/5 of x's and y's to be training, the rest of testing
+		# x.tr <- x.ij[1:round(N*4/5)]
+		# y.tr <- y.ij[1:round(N*4/5)]
+		# x.te <- x.ij[-(1:round(N*4/5))]
+		# y.te <- y.ij[-(1:round(N*4/5))]
+		
+		# mse.vec <- cv(x.tr, y.tr, x.te, y.te, kern.norm, h.vec)
+		
+		opt.h[i, j] <- h.vec[which.min(mse.vec)]
+		
+		smooth[count, ] <- y.norm <- sapply(
+							x.seq, 
+							lin.smooth, 
+							x = x.ij, 
+							y = y.ij, 
+							kern.fun = kern.norm, 
+							h = opt.h[i, j]
+							)
+							
+		
+		count <- count + 1
+	}
+	print(i)
+}
+
+ess <- qplot(x.seq, geom = "blank") +
+xlab("x") +
+ylab("y") +
+ggtitle(sprintf("sd = %5.3f, T = %5.3f, h = %5.5f", s.vec[1], p.vec[1], opt.h[1, 1])) +
+geom_point(aes(x = x.mat[1, ], y = y.mat[1, ]), pch = 1) + 
+geom_line(aes(y = fx.mat[1, ]), col = "red", linetype = "dashed") +
+geom_line(aes(y = smooth[1, ], colour = "Gaussian kernel")) + 
+scale_colour_manual(name = "Smoother", values = "blue") +
+theme(legend.position = c(0.25, 0.15), text = element_text(family="Helvetica"))
+
+tee <- qplot(x.seq, geom = "blank") +
+xlab("x") +
+ylab("y") +
+ggtitle(sprintf("sd = %5.3f, T = %5.3f, h = %5.5f", s.vec[2], p.vec[1], opt.h[1, 2])) +
+geom_point(aes(x = x.mat[2, ], y = y.mat[2, ]), pch = 1) + 
+geom_line(aes(y = fx.mat[2, ]), col = "red", linetype = "dashed") +
+geom_line(aes(y = smooth[2, ], colour = "Gaussian kernel")) + 
+scale_colour_manual(name = "Smoother", values = "blue") +
+theme(legend.position = c(0.25, 0.15), text = element_text(family="Helvetica"))
+
+you <- qplot(x.seq, geom = "blank") +
+xlab("x") +
+ylab("y") +
+ggtitle(sprintf("sd = %5.3f, T = %5.3f, h = %5.5f", s.vec[1], p.vec[2], opt.h[2, 1])) +
+geom_point(aes(x = x.mat[3, ], y = y.mat[3, ]), pch = 1) + 
+geom_line(aes(y = fx.mat[3, ]), col = "red", linetype = "dashed") +
+geom_line(aes(y = smooth[3, ], colour = "Gaussian kernel")) + 
+scale_colour_manual(name = "Smoother", values = "blue") +
+theme(legend.position = c(0.25, 0.15), text = element_text(family="Helvetica"))
+
+vee <- qplot(x.seq, geom = "blank") +
+xlab("x") +
+ylab("y") +
+ggtitle(sprintf("sd = %5.3f, T = %5.3f, h = %5.5f", s.vec[2], p.vec[2], opt.h[2, 2])) +
+geom_point(aes(x = x.mat[4, ], y = y.mat[4, ]), pch = 1) + 
+geom_line(aes(y = fx.mat[4, ]), col = "red", linetype = "dashed") +
+geom_line(aes(y = smooth[4, ], colour = "Gaussian kernel")) + 
+scale_colour_manual(name = "Smoother", values = "blue") +
+theme(legend.position = c(0.25, 0.15), text = element_text(family="Helvetica"))
+	
+
+pdf("2x2.pdf")
+grid.arrange(tee, ess, vee, you)
+dev.off()
+
+# ===========================================================================
+# Gaussian process ==========================================================
+# ===========================================================================
+
+x.seq <- seq(0, 1, length.out = 100)
+
+b <- 1
+tau1.sq <- 1e-6
+tau2.sq <- 1e-5
+
+myparams <- c(b, tau1.sq, tau2.sq)
+
+xCM52 <- make.covmat(x.seq, C.M52, params = myparams)
+xSE <- make.covmat(x.seq, C.SE, params = myparams)
+
+
+# ===========================================================================
+# Extra code for CV plotting.... ============================================
+# ===========================================================================
 
 # Cross-validation with error bars
 
@@ -113,52 +360,9 @@ scale_colour_manual(name = "", values = c("CV" = "black", "In-sample MSE" = "blu
 dev.off()
 
 
-jumble <- sample(1:length(x1), round(length(x1) / 5), rep = F)
-
-x.tr <- x1[-jumble]
-y.tr <- y1[-jumble]
-x.te <- x1[jumble]
-y.te <- y1[jumble]
-
-h1 <- seq()
-
-y.pr <- sapply(
-	x.te, 
-	lin.smooth, 
-	x = x.tr, 
-	y = y.tr, 
-	kern.fun = kern.unif, 
-	h = h1
-	)
-
-mean((y.pr - y.te)^2)
-
-h.vec <- seq(0.001, 0.05, length.out = 100)
-
-mse.vec <- cv(x.tr, y.tr, x.te, y.te, kern.norm, h.vec)
-
-which.min(mse.vec)
-h.vec[which.min(mse.vec)]
-
-plot(h.vec, mse.vec, type = "l")
-
-# ===========================================================================
-# Gaussian process ==========================================================
-# ===========================================================================
-
-x.seq <- seq(0, 1, length.out = 100)
-
-b <- 1
-tau1.sq <- 1e-6
-tau2.sq <- 1e-5
-
-myparams <- c(b, tau1.sq, tau2.sq)
-
-xCM52 <- make.covmat(x.seq, C.M52, params = myparams)
-xSE <- make.covmat(x.seq, C.SE, params = myparams)
-
-
-
+numbins <- 10
+jumble <- sample(1:N2, N2, replace = F)
+bin.indices <- split(jumble, cut(1:N2, numbins))
 
 
 
