@@ -79,6 +79,8 @@ pdf("firstexample.pdf")
 h
 dev.off()
 
+
+
 # ===========================================================================
 # Linear smoothers (cross validation) ==== make big heat map ================
 # ===========================================================================
@@ -164,10 +166,9 @@ scale_fill_distiller("Bandwidth", palette = "Spectral")
 w
 
 # Save this to PDF
-pdf("opth3.pdf", width = 7, height = 6)
+pdf("img/opth.pdf", width = 7, height = 6)
 w
 dev.off()
-
 
 
 # ===========================================================================
@@ -271,9 +272,13 @@ for (i in 1:length(p.vec)) {
 	print(i)
 }
 
+y.min <- min(y.mat)
+y.max <- max(y.mat)
+
 ess <- qplot(x.seq, geom = "blank") +
 xlab("x") +
 ylab("y") +
+ylim(y.min, y.max) + 
 ggtitle(sprintf("sd = %5.3f, T = %5.3f, h = %5.5f", s.vec[1], p.vec[1], opt.h[1, 1])) +
 geom_point(aes(x = x.mat[1, ], y = y.mat[1, ]), pch = 1) + 
 geom_line(aes(y = fx.mat[1, ]), col = "red", linetype = "dashed") +
@@ -284,6 +289,7 @@ theme(legend.position = c(0.25, 0.15), text = element_text(family="Helvetica"))
 tee <- qplot(x.seq, geom = "blank") +
 xlab("x") +
 ylab("y") +
+ylim(y.min, y.max) + 
 ggtitle(sprintf("sd = %5.3f, T = %5.3f, h = %5.5f", s.vec[2], p.vec[1], opt.h[1, 2])) +
 geom_point(aes(x = x.mat[2, ], y = y.mat[2, ]), pch = 1) + 
 geom_line(aes(y = fx.mat[2, ]), col = "red", linetype = "dashed") +
@@ -294,6 +300,7 @@ theme(legend.position = c(0.25, 0.15), text = element_text(family="Helvetica"))
 you <- qplot(x.seq, geom = "blank") +
 xlab("x") +
 ylab("y") +
+ylim(y.min, y.max) + 
 ggtitle(sprintf("sd = %5.3f, T = %5.3f, h = %5.5f", s.vec[1], p.vec[2], opt.h[2, 1])) +
 geom_point(aes(x = x.mat[3, ], y = y.mat[3, ]), pch = 1) + 
 geom_line(aes(y = fx.mat[3, ]), col = "red", linetype = "dashed") +
@@ -304,6 +311,7 @@ theme(legend.position = c(0.25, 0.15), text = element_text(family="Helvetica"))
 vee <- qplot(x.seq, geom = "blank") +
 xlab("x") +
 ylab("y") +
+ylim(y.min, y.max) + 
 ggtitle(sprintf("sd = %5.3f, T = %5.3f, h = %5.5f", s.vec[2], p.vec[2], opt.h[2, 2])) +
 geom_point(aes(x = x.mat[4, ], y = y.mat[4, ]), pch = 1) + 
 geom_line(aes(y = fx.mat[4, ]), col = "red", linetype = "dashed") +
@@ -312,9 +320,102 @@ scale_colour_manual(name = "Smoother", values = "blue") +
 theme(legend.position = c(0.25, 0.15), text = element_text(family="Helvetica"))
 	
 
-pdf("2x2.pdf")
+pdf("img/2x2.pdf")
 grid.arrange(tee, ess, vee, you)
 dev.off()
+
+# ===========================================================================
+# Local polynomial regression ===============================================
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Read in the data ----------------------------------------------------------
+# ---------------------------------------------------------------------------
+
+utilities <- read.csv("utilities.csv", header = T)
+
+x <- utilities$temp
+y <- log(utilities$gasbill / utilities$billingdays) 
+# y <- log(utilities$gasbill)
+
+# ---------------------------------------------------------------------------
+# Cross validation ----------------------------------------------------------
+# ---------------------------------------------------------------------------
+
+h.vec <- seq(0.25, 20, length.out = 500)
+num.h <- length(h.vec)
+
+hatmat.list <- list()
+loocv.vec <- rep(NA, num.h)
+
+for (i in 1:num.h) {
+	hatmat.i <- loc.pol.hatmat(x, y, D = 1, h = h.vec[i])
+	hatmat.list[[i]] <- hatmat.i
+	
+	loocv.vec[i] <- loocv(y, hatmat.i)
+	
+	if ((i %% 20) == 0) {
+		print(i)
+	}
+}
+
+plot(h.vec, loocv.vec, type = "l")
+
+h.opt <- h.vec[which.min(loocv.vec)]
+
+# ---------------------------------------------------------------------------
+# Make a plot ---------------------------------------------------------------
+# ---------------------------------------------------------------------------
+
+x.seq <- seq(min(x), max(x), length.out = 200)
+
+y.smooth <- sapply(
+	x.seq,
+	loc.pol,
+	x.vec = x, 
+	y.vec = y,
+	D = 1,
+	h = h.opt
+	)
+
+# Fitted y values
+Hatmat <- loc.pol.hatmat(x, y, D = 1, h = h.opt)
+y.hat <- Hatmat %*% y
+
+var.est <- sum((y - y.hat)^2) / 
+(length(x) - sum(diag(Hatmat)) + sum(diag(crossprod(Hatmat))))
+
+y.lo <- y.smooth - 1.96 * sqrt(var.est)
+y.hi <- y.smooth + 1.96 * sqrt(var.est)
+
+	
+resplot <- qplot(x, y - y.hat) + 
+xlab(expression(paste("Temperature (",degree,"F)"))) +
+ylab("residual") + 
+ggtitle("Residual plot for log-transformed data")
+
+pdf("resplot2.pdf")
+resplot
+dev.off()
+
+h <- qplot(x.seq, geom = "blank") +
+xlab(expression(paste("Temperature (",degree,"F)")))  +
+ylab("log-Daily gas bill (USD)") +
+labs(title = "Daily gas bills for single-family homes in Minnesota") +
+geom_ribbon(aes(ymin = y.lo, ymax = y.hi), fill = "grey80") +
+geom_point(aes(x = x, y = y), pch = 1) + 
+geom_line(aes(y = y.smooth, colour = sprintf("h = %5.4f", h.opt)))  + 
+scale_colour_manual(name = "Bandwidth", values = "firebrick3") +
+theme(plot.title = element_text(hjust = 0.5), 
+text = element_text(family = "Helvetica"),
+legend.position = c(0.25, 0.15))
+
+pdf("img/tempplot.pdf")
+h
+dev.off()
+
+# R-squared 
+# 1 - sum((loc.pol.hatmat(x, y, 1, 5) %*% y - y)^2) / sum((y - mean(y))^2)
 
 # ===========================================================================
 # Gaussian process ==========================================================

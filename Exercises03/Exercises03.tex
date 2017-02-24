@@ -19,8 +19,12 @@
 \usepackage{avant}
 \usepackage{inconsolata}
 
+\newcommand{\tr}{\text{tr}}
 \newcommand{\pN}{\mathcal{N}}
 \newcommand{\R}{\textsf{R} }
+\newcommand{\1}{\mathbf{1}}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\y}{\mathbf{y}}
 \newcommand{\iid}{\overset{\text{iid}}{\sim}}
 \newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
@@ -335,7 +339,7 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	\begin{figure}[htp!]
 		\centering
-			% \includegraphics[scale=0.5]{opth3.pdf}
+			\includegraphics[scale=0.5]{img/opth.pdf}
 		\caption{Optimal bandwidths for varying periods and standard deviations}
 		\label{fig:heatmap}
 	\end{figure}
@@ -344,7 +348,7 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	\begin{figure}[htp!]
 		\centering
-			\includegraphics[scale=0.5]{2x2.pdf}
+			\includegraphics[scale=0.5]{img/2x2.pdf}
 		\caption{$2\times2$ example with fitted curves}
 		\label{fig:2x2}
 	\end{figure}
@@ -385,13 +389,13 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	%
-	\begin{align}
+	\begin{align*}
 		g_x(u; a) &= a_0 + \sum_{k=1}^D a_k (u - x)^k \\
 		&= \begin{cases}
 			\sum_{j=0}^{D+1} a_j (u - x)^j &\;\text{ if } u \neq x \\
 			a_0 &\;\text{ if } u = x
 		\end{cases}.
-	\end{align}
+	\end{align*}
 	%
 	%
 	%
@@ -432,7 +436,26 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	%
+	The estimate of $f$ at $x$, up to a proportionality is
 	%
+	%
+	%
+	\begin{align*}
+		\hat{f}(x) &\propto \sum_{i=1}^n w_i g_x(x_i; \hat{a}) \\
+		&= \1^T W R_x \hat{a}  \\
+		&= \1^T W R_x (R_x^T W R_x)^{-1}R_x^TWy \\
+		&= b_x^T y
+	\end{align*}
+	%
+	%
+	%
+	if we define the vector $b_x^T = \1^T W R_x (R_x^T W R_x)^{-1}R_x^TW$. Note that we need to normalize our estimate so that the ``weights'' sum to one, so now our estimate is exactly
+	%
+	%
+	%
+	\begin{align*}
+		\hat{f}(x) &= \frac{b_x^Ty}{\| b_x \|_1}.
+	\end{align*} 
 	%
 	%
 	%
@@ -440,13 +463,23 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	%
-	With $H$ a smoothing matrix (or ``hat matrix''), let $r = y - Hy$ be the vector of residuals. If the random vector $x$ with mean vector $\mu$ and covariance matrix $\Sigma$, then $E(x^TQx) = \text{tr}(Q\Sigma) + \mu^T Q \mu$. Then, 
+	With $H$ a smoothing matrix (or ``hat matrix''), let $r = y - Hy$ be the vector of residuals. If the random vector $x$ with mean vector $\mu$ and covariance matrix $\Sigma$, then $E(x^TQx) = \text{tr}(Q\Sigma) + \mu^T Q \mu$. By assumption, $E(\mathbf{y}) = f(\mathbf{x})$ and $\text{cov}(\mathbf{y}) = \sigma^2 I$ Then, 
 	%
 	%
 	%
 	\begin{align*}
-		E \left( || r^2 || \right) &= E \left( (y - Hy)^T(y-Hy) \right)
+		E \left( \| r^2 \|_2^2 \right) &= E \left( (\y - H\y)^T(\y-H\y) \right) \\
+		&= E \left( \y^T \y - 2\y^T H \y + \y^T H^T H \y \right) \\
+		&= E\left(\y^T \y  \right) - 2 E \left( \y^T H \y \right) + E \left( \y^T H^T H \y \right) \\
+		&= \left( \tr\left[ I\sigma^2 I \right] + f(\x)^T f(\x) \right) - 2 \left( \tr\left[ H^T\sigma^2 I \right] + f(\x)^T H^T f(\x) \right) + \left( \tr \left[ H^T H \sigma^2 I \right] + f(\x)^T H^T H f(\x)\right) \\
+		&= \left( n\sigma^2 + f(\x)^T f(\x) \right) - 2 \left( \sigma^2 \tr[H] + f(\x)^T H^T f(\x) \right) + \left( \sigma^2 \tr[H^TH] + f(\x)^T H^T H f(\x)\right) \\
+		&= \left(n - \tr[H] + \tr [H^T H] \right) \sigma^2 + \left( f(\x)^T f(\x) - 2 f(\x)^T H^T f(\x) + f(\x)^T H^T H f(\x) \right) \\
+		&= \left(n - \tr[H] + \tr [H^T H] \right) \sigma^2 + \left( f(\x) - Hf(\x) \right)^T \left( f(\x) - Hf(\x) \right),
 	\end{align*}
+	%
+	%
+	%
+	so the estimator $$\hat{\sigma}^2 = \frac{\| r^2 \|_2^2}{n - \tr[H] + \tr [H^T H]}$$ will be nearly unbiased in $\sigma^2$ when $f(\x) \approx H f(\x)$.
 	%
 	%
 	%

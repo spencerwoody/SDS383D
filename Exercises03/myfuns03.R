@@ -141,9 +141,9 @@ cv <- function(x.tr, y.tr, x.te, y.te, KERN.FUN, h) {
 # Local polynomial regression ===============================================
 # ===========================================================================
 
-loc.lin <- function(x.new, x, y, h) {
+loc.lin <- function(x.new, x.vec, y.vec, h) {
 	# --------------------------------------------------------------------
-	# Give local linear estimator at some new point with Gaussian kernel
+	# Give local linear estimator at some new point with normal kernel
 	# --------------------------------------------------------------------
 	# INPUTS:
 	# x.new is some new point on x
@@ -164,6 +164,106 @@ loc.lin <- function(x.new, x, y, h) {
 	fit <- crossprod(w.x, y.vec) / sum(w.x)
 	
 	return(fit)
+}
+
+loc.pol <- function(x.new, x.vec, y.vec, D, h, give.mat = FALSE) {
+	# --------------------------------------------------------------------
+	# Local polynomial reg. estimator at some new point with normal kernel
+	# --------------------------------------------------------------------
+	# INPUTS:
+	# x.new is some new point on x
+	# x.vec - vector of x in sample
+	# y.vec - vector of y in sample
+	# D - dimension of the polynomial estimator (e.g., D = 1 means linear)
+	# h - bandwidth for normal kernel
+	# --------------------------------------------------------------------
+	# OUTPUT (list): 
+  	# fit - the estimated value of f at x using local linear estimator
+	# hatmat.vec - normalized weights, to be used in creating a hat matrix
+	# --------------------------------------------------------------------	
+	
+	# Number of observations
+	N <- length(x.vec)
+	
+	# Vector of weights from Gaussian kernel
+	w <- kern.norm(x.new - x.vec, h) / h
+	
+	# Create (non-normalized weights)
+	if (D == 0) { # case of local constant estimator
+		
+		b <- matrix(w, nrow = 1)
+		
+	} else { # case of local polynomial estimator
+		
+		# Create R matrix
+		R.x <- matrix(nrow = N, ncol = (D + 1))
+		R.x[, 1] <- rep(1, N)
+		
+		for (j in 2:(D+1)) {
+			R.x[, j] <- (x.new - x.vec)^(j - 1)
+		} 
+		
+		W.diag <- diag(w)
+		
+		RxTW <- crossprod(R.x, W.diag)
+		
+		b <- crossprod(w, R.x) %*% solve(RxTW %*% R.x) %*% RxTW
+	}
+	
+	fit <- tcrossprod((b / sum(b)), y.vec)
+	
+	# Should the hat matrix vector be given? 
+	if (give.mat) {
+		output <- list("fit" = fit, "hatmat.vec" = b / sum(b))
+	} else {
+		output <- fit
+	}
+	
+	return(output)
+}
+
+loc.pol.hatmat <- function(x, y, D, h) {
+	# --------------------------------------------------------------------
+	# Create a hat matrix from local polynomial estimator
+	# --------------------------------------------------------------------
+	# INPUTS:
+	# x - vector of x in sample
+	# y - vector of y in sample
+	# D - dimension of the polynomial estimator (e.g., D = 1 means linear)
+	# h - bandwidth for normal kernel
+	# --------------------------------------------------------------------
+	# OUTPUT (list): 
+  	# hatmat - hat matrix from local polynomial estimator
+	# --------------------------------------------------------------------	
+	
+	N <- length(x)
+	
+	hatmat <- matrix(nrow = N, ncol = N)
+	
+	for (i in 1:N) {
+		hatmat[i, ] <- loc.pol(x[i], x, y, D, h, give.mat = TRUE)$hatmat.vec
+	}
+	
+	return(hatmat)
+}
+
+loocv <- function(y, H) {
+	# --------------------------------------------------------------------
+	# Generic leave-one-out cross validation
+	# --------------------------------------------------------------------
+	# INPUTS:
+	# y - the response vector
+	# H - the "hat" matrix
+	# --------------------------------------------------------------------
+	# OUTPUT: 
+  	# loocv - leave-one-out cross validation error
+	# --------------------------------------------------------------------	
+	
+	y.hat <- H %*% y
+	
+	loocv <- sum( ( {y - y.hat} / {1 - diag(H)} )^2 )
+	
+	return(loocv)
 }
 
 # ===========================================================================
