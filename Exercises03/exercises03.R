@@ -335,14 +335,14 @@ dev.off()
 utilities <- read.csv("utilities.csv", header = T)
 
 x <- utilities$temp
-y <- log(utilities$gasbill / utilities$billingdays) 
-# y <- log(utilities$gasbill)
+y <- log(utilities$gasbill / utilities$billingdays)
+
 
 # ---------------------------------------------------------------------------
 # Cross validation ----------------------------------------------------------
 # ---------------------------------------------------------------------------
 
-h.vec <- seq(0.25, 20, length.out = 500)
+h.vec <- seq(1, 20, length.out = 500)
 num.h <- length(h.vec)
 
 hatmat.list <- list()
@@ -355,17 +355,19 @@ for (i in 1:num.h) {
 	loocv.vec[i] <- loocv(y, hatmat.i)
 	
 	if ((i %% 20) == 0) {
-		print(i)
+		print(sprintf("Iteration %i out of %i...", i, num.h))
 	}
 }
 
-plot(h.vec, loocv.vec, type = "l")
+plot(h.vec, loocv.vec, type = "l", xlab = "Bandwidth", ylab = "LOOCV")
 
 h.opt <- h.vec[which.min(loocv.vec)]
 
 # ---------------------------------------------------------------------------
 # Make a plot ---------------------------------------------------------------
 # ---------------------------------------------------------------------------
+
+# h.opt <- 4.9
 
 x.seq <- seq(min(x), max(x), length.out = 200)
 
@@ -378,10 +380,15 @@ y.smooth <- sapply(
 	h = h.opt
 	)
 
+
 # Fitted y values
 Hatmat <- loc.pol.hatmat(x, y, D = 1, h = h.opt)
 y.hat <- Hatmat %*% y
 
+# R-squared
+r.sq <- 1 - sum((y - y.hat)^2) / sum((y - mean(y))^2)
+
+# Estimated variance
 var.est <- sum((y - y.hat)^2) / 
 (length(x) - sum(diag(Hatmat)) + sum(diag(crossprod(Hatmat))))
 
@@ -389,16 +396,18 @@ y.lo <- y.smooth - 1.96 * sqrt(var.est)
 y.hi <- y.smooth + 1.96 * sqrt(var.est)
 
 	
-resplot <- qplot(x, y - y.hat) + 
+resplot <- qplot(x, y - y.hat, geom = "blank") + 
+geom_point(pch = 1) +
+geom_hline(yintercept = 0) +
 xlab(expression(paste("Temperature (",degree,"F)"))) +
 ylab("residual") + 
 ggtitle("Residual plot for log-transformed data")
 
-pdf("resplot2.pdf")
+pdf("img/resplot2.pdf")
 resplot
 dev.off()
 
-h <- qplot(x.seq, geom = "blank") +
+q <- qplot(x.seq, geom = "blank") +
 xlab(expression(paste("Temperature (",degree,"F)")))  +
 ylab("log-Daily gas bill (USD)") +
 labs(title = "Daily gas bills for single-family homes in Minnesota") +
@@ -410,8 +419,9 @@ theme(plot.title = element_text(hjust = 0.5),
 text = element_text(family = "Helvetica"),
 legend.position = c(0.25, 0.15))
 
+
 pdf("img/tempplot.pdf")
-h
+q
 dev.off()
 
 # R-squared 

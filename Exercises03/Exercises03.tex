@@ -399,7 +399,7 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	%
-	The coefficients of $a$ will come from the weighted least squares problem 
+	The coefficients of $a$ for the local polynomial regression with dimension $D$ will come from the weighted least squares problem 
 	%
 	%
 	%
@@ -420,7 +420,7 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	%
-	where $W = \text{diag}(w_1, \ldots, w_n)$ following the same argument to find the WLS estimate of linear regression from Exercises 1.
+	where $W = \text{diag}(w_1, \ldots, w_n)$ is a diagonal matrix of weights from some kernel, $$w_i = \frac{1}{h}K\left( \frac{x_i - x}{h}\right)$$ and this solution is found following the same argument to find the WLS estimate of linear regression from Exercises 1.
 	%
 	%
 	%
@@ -428,7 +428,112 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	%
+	Define the matrix $B_x = (R_x^T W R_x)^{-1}R_x^TW$. The estimate of $f$ at a point $x^\star$ is $\hat{f}(x) = \hat{a}_0$, the first element of the vector $\hat{a}$ whose form is derived above. Since our estimate is in the form of a linear smoother, this can also be written as $\hat{f}(x) = \frac{b_x^T y}{\sum_{i=1}^n b_{x, i}}$ if we take $b^T$ to be the first row of $B$. In the special case of the local linear smoother ($D=1$), the matrix $R_x$ has dimension $n \times 2$ and can be written as 
 	%
+	%
+	%
+	\begin{align*}
+		R_x &= \begin{bmatrix}
+			1 & x_1 - x \\
+			\vdots & \vdots \\
+			1 & x_n - x
+		\end{bmatrix}.
+	\end{align*}
+	%
+	%
+	%
+	\begin{align*}
+		R_x^T &= \begin{bmatrix}
+			1 & \ldots & 1 \\
+			x_1 - x & \ldots & x_n - x
+		\end{bmatrix}
+	\end{align*}
+	%
+	%
+	%
+	\begin{align*}
+		W &= \begin{bmatrix}
+    w_{1} &  & \mathcal{O}\\
+    & \ddots & \\
+    \mathcal{O} & & w_{n}
+  \end{bmatrix}
+	\end{align*}
+	%
+	%
+	%
+	\begin{align*}
+		R_x^T W R_x &= \begin{bmatrix}
+			\sum_{i=1}^n w_i & \sum_{i=1}^n w_i (x_i - x)  \\
+			\sum_{i=1}^n w_i (x_i - x) & \sum_{i=1}^n w_i(x_i - x)^2
+		\end{bmatrix} ^{-1}
+	\end{align*}
+	%
+	%
+	%
+	\begin{align*}
+		R_x^T W &= \begin{bmatrix}
+			w_1 &\ldots & w_n \\
+			w_1(x_1 - x) &\ldots & w_n(x_n - x)
+		\end{bmatrix}
+	\end{align*}
+	%
+	%
+	%
+	Furthermore, define the term $$ s_j(x) = \sum_{i=1}^n w_i (x_i - x)^j. $$ Now we can find the exact form of $B$ up to a proportionality constant, 
+	%
+	%
+	%
+	\begin{align*}
+		B &= (R_x^T W R_x)^{-1}R_x^TW \\
+		&= \left( \begin{bmatrix}
+			1 & \ldots & 1 \\
+			x_1 - x & \ldots & x_n - x
+		\end{bmatrix} \begin{bmatrix}
+    w_{1} &  & \mathcal{O}\\
+    & \ddots & \\
+    \mathcal{O} & & w_{n}
+  \end{bmatrix} \begin{bmatrix}
+			1 & x_1 - x \\
+			\vdots & \vdots \\
+			1 & x_n - x
+		\end{bmatrix} \right)^{-1} \begin{bmatrix}
+			1 & \ldots & 1 \\
+			x_1 - x & \ldots & x_n - x
+		\end{bmatrix} \begin{bmatrix}
+    w_{1} &  & \mathcal{O}\\
+    & \ddots & \\
+    \mathcal{O} & & w_{n}
+  \end{bmatrix} \\
+  &= \begin{bmatrix}
+			\sum_{i=1}^n w_i & \sum_{i=1}^n w_i (x_i - x)  \\
+			\sum_{i=1}^n w_i (x_i - x) & \sum_{i=1}^n w_i(x_i - x)^2
+		\end{bmatrix} ^{-1} \begin{bmatrix}
+			w_1 &\ldots & w_n \\
+			w_1(x_1 - x) &\ldots & w_n(x_n - x)
+		\end{bmatrix} \\
+		&= \begin{bmatrix}
+			\sum_{i=1}^n w_i & s_1(x)  \\
+			s_1(x) & s_2(x)
+		\end{bmatrix} ^{-1} \begin{bmatrix}
+			w_1 &\ldots & w_n \\
+			w_1(x_1 - x) &\ldots & w_n(x_n - x)
+		\end{bmatrix} \\
+		&\propto  \begin{bmatrix}
+			s_2(x) & -s_1(x)  \\
+			-s_1(x) & \sum_{i=1}^n w_i
+		\end{bmatrix} \begin{bmatrix}
+			w_1 &\ldots & w_n \\
+			w_1(x_1 - x) &\ldots & w_n(x_n - x)
+		\end{bmatrix} \\
+		&= \begin{bmatrix}
+			w_1 ( s_2(x) - (x_1 - x) s_1(x) ) &\ldots & w_n \left( s_2(x) - (x_n - x) s_1(x) \right) \\
+			w_1 ( (x_1 - x)\sum_{i=1}^n w_i -s_1(x)) & \ldots &w_n ( (x_n - x)\sum_{i=1}^n w_i -s_1(x))
+		\end{bmatrix}.
+	\end{align*}
+	%
+	%
+	%
+	From this we conclude that $\hat{f}(x)$ is a linear smoother with a weight on each $y_i$ proportional to $b_{x,i} = w_i ( s_2(x) - (x_i - x) s_1(x) ).$
 	%
 	%
 	%
@@ -436,26 +541,7 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	%
-	The estimate of $f$ at $x$, up to a proportionality is
 	%
-	%
-	%
-	\begin{align*}
-		\hat{f}(x) &\propto \sum_{i=1}^n w_i g_x(x_i; \hat{a}) \\
-		&= \1^T W R_x \hat{a}  \\
-		&= \1^T W R_x (R_x^T W R_x)^{-1}R_x^TWy \\
-		&= b_x^T y
-	\end{align*}
-	%
-	%
-	%
-	if we define the vector $b_x^T = \1^T W R_x (R_x^T W R_x)^{-1}R_x^TW$. Note that we need to normalize our estimate so that the ``weights'' sum to one, so now our estimate is exactly
-	%
-	%
-	%
-	\begin{align*}
-		\hat{f}(x) &= \frac{b_x^Ty}{\| b_x \|_1}.
-	\end{align*} 
 	%
 	%
 	%
@@ -487,7 +573,7 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	%
-	%
+	See attached \R code for implementation of the local polynomial regression, along with leave-one-out cross validation.
 	%
 	%
 	%
@@ -495,7 +581,16 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	%
+	Fitting this model with $D=1$, the assumption of homoscedasticity (constance variance of residuals) is not met. The residuals fan out towards the lower end of the range for temperature. Taking a logarithmic transform of the response variable, daily gas bill, makes the residuals more uniform, although there are still several outliers in the residuals, now towards the higher ejnd of the range for temperature. See figures below.
 	%
+	%
+	%
+	\begin{figure}[htp!]
+		\centering
+			\includegraphics[scale=0.45]{img/resplot1.pdf}
+			\includegraphics[scale=0.45]{img/resplot2.pdf}
+		\caption{Residual plots for models fitted with non-transformed (left) and log-transformed (right) response variables}
+	\end{figure}
 	%
 	%
 	%
@@ -503,7 +598,15 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	%
+	The figure below shows the fitted model with 95\% confidence bands (found with $\hat{y} \pm 1.96 \hat{\sigma}$) and overlaid scatterplot of the data. The optimal bandwidth $h = 5.4168$ was chosen with leave-one-out cross validation. The fit is pretty good, with $R^2 = 0.88$, but there are four observations which fall outside the confidence band.
 	%
+	%
+	%
+	\begin{figure}[htp!]
+		\centering
+			\includegraphics[scale=0.75]{img/tempplot.pdf}
+		\caption{Local linear regression for Minnesota gas bill data}
+	\end{figure}
 	%
 	%
 	%

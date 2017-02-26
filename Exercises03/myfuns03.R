@@ -159,7 +159,8 @@ loc.lin <- function(x.new, x.vec, y.vec, h) {
 	
 	s1 <- sum(kern.x * (x - x.new))
 	s2 <- sum(kern.x * (x - x.new)^2)
-	w.x <- kern.x * (s2 * x.new - s1 * (x - x.new))
+	# w.x <- kern.x * (s2 * x.new - s1 * (x - x.new))
+	w.x <- kern.x * (s2 - s1 * (x - x.new))
 	
 	fit <- crossprod(w.x, y.vec) / sum(w.x)
 	
@@ -186,7 +187,8 @@ loc.pol <- function(x.new, x.vec, y.vec, D, h, give.mat = FALSE) {
 	N <- length(x.vec)
 	
 	# Vector of weights from Gaussian kernel
-	w <- kern.norm(x.new - x.vec, h) / h
+	w <- kern.norm(x.vec - x.new, h) / h
+	w <- w / sum(w)
 	
 	# Create (non-normalized weights)
 	if (D == 0) { # case of local constant estimator
@@ -200,21 +202,22 @@ loc.pol <- function(x.new, x.vec, y.vec, D, h, give.mat = FALSE) {
 		R.x[, 1] <- rep(1, N)
 		
 		for (j in 2:(D+1)) {
-			R.x[, j] <- (x.new - x.vec)^(j - 1)
+			R.x[, j] <- (x.vec - x.new)^(j - 1)
 		} 
 		
 		W.diag <- diag(w)
 		
 		RxTW <- crossprod(R.x, W.diag)
 		
-		b <- crossprod(w, R.x) %*% solve(RxTW %*% R.x) %*% RxTW
+		B <- solve(RxTW %*% R.x) %*% RxTW
+		b <- matrix(B[1, ], nrow = 1)
 	}
 	
-	fit <- tcrossprod((b / sum(b)), y.vec)
+	fit <- tcrossprod( (b / sum(b)) , y.vec)
 	
 	# Should the hat matrix vector be given? 
 	if (give.mat) {
-		output <- list("fit" = fit, "hatmat.vec" = b / sum(b))
+		output <- list("fit" = fit, "hatmat.vec" = as.vector(b / sum(b)))
 	} else {
 		output <- fit
 	}
