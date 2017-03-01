@@ -6,6 +6,7 @@ library(ggplot2)
 library(reshape2)
 library(gridExtra)
 library(wesanderson) # nice palettes
+library(mvtnorm)
 
 # Prep color palette
 # pal <- wes_palette("Zissou", 5)
@@ -424,24 +425,42 @@ pdf("img/tempplot.pdf")
 q
 dev.off()
 
-# R-squared 
-# 1 - sum((loc.pol.hatmat(x, y, 1, 5) %*% y - y)^2) / sum((y - mean(y))^2)
-
 # ===========================================================================
 # Gaussian process ==========================================================
 # ===========================================================================
 
 x.seq <- seq(0, 1, length.out = 100)
 
-b <- 1
-tau1.sq <- 1e-6
-tau2.sq <- 1e-5
+b <- 0.5
+tau1.sq <- 2e-5
+tau2.sq <- 0
 
 myparams <- c(b, tau1.sq, tau2.sq)
 
 xCM52 <- make.covmat(x.seq, C.M52, params = myparams)
 xSE <- make.covmat(x.seq, C.SE, params = myparams)
 
+GP <- rmvnorm(1, mean = rep(0, 100), sigma = xCM52)
+
+plot(x.seq, GP)
+
+# Plot these things
+xCM52.m <- melt(xCM52)
+xCM52.m[, 1] <- rep(x.seq, length(x.seq))
+xCM52.m[, 2] <- rep(x.seq, each = length(x.seq))
+
+w <- ggplot(xCM52.m, aes(Var1, Var2, z = value)) +
+ggtitle("Matern(5/2) covariance function") + 
+xlab("x[i]") +
+ylab("x[j]") +
+geom_tile(aes(fill = value)) +
+scale_fill_distiller("Cov(x[i], x[j])", palette = "Spectral") +
+theme_bw()
+w
+
+
+
+plot(x.seq, GP, type = "l")
 
 # ===========================================================================
 # Extra code for CV plotting.... ============================================

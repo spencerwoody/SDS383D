@@ -11,6 +11,7 @@
 \usepackage{graphicx} % Required to insert images
 \usepackage{amsmath}% http://ctan.org/pkg/amsmath
 \usepackage{listings} % Required for insertion of code
+\usepackage{bm}
 %\usepackage{couriernew} % Required for the courier font
 
 \usepackage{enumerate} % Required for enumerating with letters
@@ -23,8 +24,18 @@
 \newcommand{\pN}{\mathcal{N}}
 \newcommand{\R}{\textsf{R} }
 \newcommand{\1}{\mathbf{1}}
+\newcommand{\0}{\mathbf{0}}
 \newcommand{\x}{\mathbf{x}}
+\newcommand{\f}{\mathbf{f}}
 \newcommand{\y}{\mathbf{y}}
+
+
+% \newcommand{\1}{\bm{1}}
+% \newcommand{\0}{\bm{0}}
+% \newcommand{\x}{\bm{x}}
+% \newcommand{\f}{\bm{f}}
+% \newcommand{\y}{\bm{y}}
+
 \newcommand{\iid}{\overset{\text{iid}}{\sim}}
 \newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
@@ -634,11 +645,69 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	%
+	Examples...
 	%
 	%
 	%
+	\item % B
 	%
-\end{enumerate}
+	%
+	%
+	Suppose that we have a sequence coming from a Gaussian process, $[x_1, x_2, \ldots, x_N, x^\star]^T \sim f \sim \text{GP}(m, C)$ for some mean function $m$ and covariance function $C$. We want to find the distribution of $x^\star$ conditional on the observations $\x = [x_1, x_2, \ldots, x_N]^T$. First, define the three matrices, 
+	%
+	%
+	%
+	\begin{align*}
+		C &= \begin{bmatrix}
+			C(x_1, x_1) & C(x_1, x_2) & \ldots & C(x_1, x_N) \\
+			C(x_2, x_1) & C(x_2, x_2) & \ldots & C(x_2, x_N) \\
+			\vdots & \vdots & \ddots & \vdots \\
+			C(x_N, x_1) & C(x_N, x_2) & \ldots & C(x_N, x_N)
+		\end{bmatrix} \\
+		C_\star &= \begin{bmatrix}
+			C(x^\star, x_1)  & C(x^\star, x_2) & \ldots & C(x^\star, x_N)
+		\end{bmatrix} \\
+		C_{\star \star} &= \begin{bmatrix}
+			C(x^\star, x^\star)
+		\end{bmatrix}.
+	\end{align*}
+	%
+	%
+	%
+	The joint distribution may be written as
+	%
+	%
+	%
+	\begin{align*}
+		\begin{bmatrix}
+			 \x \\
+			 x^\star
+		\end{bmatrix} &\sim \pN \left(  \begin{bmatrix}
+			m(x^\star) \\
+			m(\x)
+		\end{bmatrix}  , \begin{bmatrix}
+			C & C_\star^T \\
+			C_\star & C_{\star \star}
+		\end{bmatrix} \right).
+	\end{align*}
+	%
+	%
+	%
+	In Exercises 1, we showed how to derive the conditional distribution from a multivariate normal distribution. Here, we can see that 
+	%
+	%
+	%
+	\begin{align*}
+		x^\star | \x \sim \pN \left( m(x^\star) + C_\star C^{-1}(\x - m(\x)), C_{\star \star} - C_\star C^{-1} C_\star^T \right).
+	\end{align*}
+	%
+	%
+	%
+	\item % C
+	%
+	%
+	%
+	\end{enumerate}
 
 \end{homeworkProblem}
 
@@ -649,6 +718,8 @@ In this problem, consider a general nonlinear regression with one predictor and 
 
 \pagebreak
 
+
+
 % To have just one problem per page, simply put a \clearpage after each problem
 
 \begin{homeworkProblem}
@@ -657,13 +728,229 @@ In this problem, consider a general nonlinear regression with one predictor and 
 \textbf{In nonparametric regression and spacial smoothing}
 \normalsize
 
+	We have the likelihood $y | \theta \sim \pN (R\theta, \Sigma)$ and the prior distribution $\theta \sim \pN(m, V)$. Let $\Omega = \Sigma^{-1}$ and $W = V^{-1}$. We can expand out the respective PDFs of these distributions up to a proportionality constant,
+	%
+	%
+	%
+	\begin{align*}
+		p(y|\theta) &\propto \exp \left[ -\frac{1}{2} (y-R\theta)^T \Omega (y - R\theta) \right] \\
+		&= \exp \left[ -\frac{1}{2} (R\theta - y)^T \Omega (R\theta - y) \right] \\
+		&= \exp \left[ -\frac{1}{2} (\theta^T R^T \Omega R \theta - 2y^T\Omega R\theta + y^T\Omega y) \right] \\
+		p(\theta)&\propto \exp \left[ -\frac{1}{2} (\theta - m)^TW(\theta-m)\right] \\
+		&= \exp \left[ -\frac{1}{2} (\theta^TW\theta - 2m^TW\theta + m^TWm) \right]
+	\end{align*}
+	%
+	%
+	%
+	Then, by dropping proportionality terms not containing $\theta$ and completing the square, the posterior of $\theta$ is 
+	%
+	%
+	%
+	\begin{align*}
+		p(\theta | y) &\propto p(y|\theta) p(\theta) \\
+		&\propto \exp \left[ -\frac{1}{2} (\theta^T [W + R^T\Omega R] \theta - 2[m^TW + y^T\Omega R] \theta)\right] \\
+		&\propto \exp \left[ -\frac{1}{2}(\theta - [W + R^T \Omega R]^{-1}[Wm + R^T\Omega y])^T(W + R^T\Omega R) (\theta - [W + R^T \Omega R]^{-1}[Wm + R^T\Omega y]) \right].
+	\end{align*}
+	%
+	%
+	%
+	Thus we can see that the posterior distribution is $\theta | y \sim \pN(m', (W')^{-1})$, where
+	%
+	%
+	%
+	\begin{align*}
+		m' &= (W')^{-1}(Wm + R^T\Omega y) \\
+		W' &= W + R^T\Omega R
+	\end{align*}
+	%
+	%
+	%
+
 
 \begin{enumerate}[(A)]
 	\item % A
 	%
 	%
 	%
+	We observe data $y_i = f(x_i) + \epsilon_i$, where $\epsilon \iid \pN(0, \sigma^2)$ and there is some unknown function $f$. In this problem, we assume $\sigma$ is known. Now we put a mean-zero Gaussian process prior distribution on $f \sim \text{GP}(0, C(\bullet))$ for some covariance function $C(\bullet)$. Let $\x = [x_1, x_2, \ldots, x_N]^T$ denote the previous observed $x$ points. Further, define the random vector $\f = [f(x_1), f(x_2), \ldots, f(x_N)]^T$. We want to find the posterior distribution of $\f$ given the observed responses $\y = [y_1, y_2, \ldots, y_N]^T$. The likelihood is 
 	%
+	%
+	%
+	\begin{align*}
+		(\y | \f) \sim \pN(\f, \sigma^2I)
+	\end{align*}
+	%
+	%
+	%
+	and, if we define the covariance matrix $C$ such that its $(i, j)$ element is $C(x_i, x_j)$ the prior for $\f$ is 
+	%
+	%
+	%
+	\begin{align*}
+		\f \sim \pN(\0, C).
+	\end{align*}
+	%
+	%
+	%
+	And with this, we can find the posterior for $\f$,  
+	%
+	%
+	%
+	\begin{align*}
+		p(\f | \y) &\propto p(\y | \f) p(\f).
+	\end{align*}
+	%
+	%
+	%
+	From the general result we have already shown above, we can see that the posterior of $\f$ will take the form 
+	%
+	%
+	%
+	\begin{align}
+		p(\f | y) \sim \pN(m', (D')^{-1}),
+	\end{align}
+	where
+	%
+	%
+	%
+	\begin{align*}
+		m' &= \frac{1}{\sigma^2}(D')^{-1}y \\
+		D' &= C^{-1} + \frac{1}{\sigma^2}I
+	\end{align*}
+	%
+	%
+	%
+	\item % B
+	%
+	%
+	%
+	In this section we are trying to predict the value of the function $f(x^\star_j)$ for $j = 1, 2, \ldots, M$ at new points $\x^\star = [x^\star_1, x^\star_2, \ldots, x^\star_M]^T$ given the observed data $\y$. First, since $\y = \f + \bm{\epsilon}$, it is distributed with 
+	%
+	%
+	%
+	\begin{align*}
+		\y \sim \pN(\0, C + \sigma^2 I),
+	\end{align*}
+	%
+	%
+	%
+	and furthermore, we can express the joint distribution of $y$ and $\f^\star = [f(x^\star_1), f(x^\star_2), \ldots, f(x^\star_M)]$ as
+	%
+	%
+	%
+	\begin{align*}
+		\begin{bmatrix}
+			y \\
+			\f^\star
+		\end{bmatrix} \sim \pN \left( \0, \begin{bmatrix}
+			C + \sigma^2I & C_\star^T \\
+			C_\star & C_{\star \star}
+		\end{bmatrix} \right),
+	\end{align*}
+	%
+	%
+	%
+	where $C$ is defined as before, 
+	%
+	%
+	%
+	\begin{align*}
+		C_\star &= \begin{bmatrix}
+			C(x_1^\star, x_1) & C(x_1^\star, x_2) & \ldots & C(x_1^\star, x_N) \\
+			C(x_2^\star, x_1) & C(x_2^\star, x_2) & \ldots & C(x_2^\star, x_N) \\
+			\vdots & \vdots & \ddots & \vdots \\
+			C(x_M^\star, x_1) & C(x_M^\star, x_2) & \ldots & C(x_M^\star, x_N)
+		\end{bmatrix},
+	\end{align*}
+	%
+	%
+	%
+	and,
+	%
+	%
+	%
+	\begin{align*}
+		C_{\star\star} &= \begin{bmatrix}
+			C(x_1^\star, x_1^\star) & C(x_1^\star, x_2^\star) & \ldots & C(x_1^\star, x_M^\star) \\
+			C(x_2^\star, x_1^\star) & C(x_2^\star, x_2^\star) & \ldots & C(x_2^\star, x_M^\star) \\
+			\vdots & \vdots & \ddots & \vdots \\
+			C(x_M^\star, x_1^\star) & C(x_M^\star, x_2^\star) & \ldots & C(x_M^\star, x_M^\star)
+		\end{bmatrix}.
+	\end{align*}
+	%
+	%
+	%
+	Note that the off-diagonal sub-matrices of the larger covariance matrix in the joint distribution does not include $\sigma^2$ because any residual $\epsilon_i$ is independent of any $f(x_i)$. From the properties of the conditional multivariate normal distribution, the conditional distribution of $\f^\star$ on $\y$ is 
+	%
+	%
+	%
+	\begin{align*}
+				\f^\star | \y \sim \pN \left( C_\star (C + \sigma^2I)^{-1} \y, C_{\star \star} - C_\star (C + \sigma^2I)^{-1} C_\star^T \right).
+	\end{align*}
+	%
+	%
+	%
+	From this, we see that
+	%
+	%
+	%
+	\begin{align}
+		E(\f^\star) &= C_\star (C + \sigma^2I)^{-1} \y \\
+		\text{cov}(\f^\star) &= C_{\star \star} - C_\star (C + \sigma^2I)^{-1} C_\star^T
+	\end{align}
+	%
+	%
+	%
+	\item % C
+	%
+	%
+	%
+	Stuff.
+	%
+	%
+	%
+	\item % D
+	%
+	%
+	%
+	In this problem, we find the general form of the marginal likelihood of $\y$, integrating out the unknown $\f$. Remember that $\y | \f \sim \pN (\f, \sigma^2 I)$ and $\f \sim \pN(\0, C)$.
+	\small
+	%
+	%
+	%
+	\begin{align*}
+		p(\y) &= \int_{\mathbb{R}^N} p(\y | \f) p(\f) d\f \\
+		&\propto \int_{\mathbb{R}^N} \exp \left[ -\frac{1}{2\sigma^2} (\y - \f)^T(\y - \f) \right] \exp \left[ -\frac{1}{2} \f^TC^{-1}\f \right] d\f \\
+		%
+		&= \int_{\mathbb{R}^N} \exp \left[ -\frac{1}{2\sigma^2} (\y^T\y - 2\y^T\f + \f^T\f) \right] \exp \left[ -\frac{1}{2} \f^TC^{-1}\f \right] d\f \\
+		%
+		&= \exp\left[ -\frac{1}{2\sigma^2} \y^T\y \right] \cdot \int_{\mathbb{R}^N} \exp\left[ -\frac{1}{2} \left( \f^T \left[\frac{1}{\sigma^2}I + C^{-1}\right]\f - 2 \cdot \frac{\y^T}{\sigma^2}\f\right) \right] d\f \\
+		%
+		&= \exp\left[ -\frac{1}{2\sigma^2} \y^T\y \right] \times \ldots \\
+		%
+		&\; \int_{\mathbb{R}^N} \exp \left[ -\frac{1}{2} \left( \left[ \f - \left( \frac{1}{\sigma^2}I + C^{-1} \right)^{-1} \frac{\y}{\sigma^2} \right]^T \left[ \frac{1}{\sigma^2}I + C^{-1} \right] \left[ \f - \left( \frac{1}{\sigma^2}I + C^{-1} \right)^{-1} \frac{\y}{\sigma^2} \right] - \frac{\y^T}{\sigma^2}\left[ \frac{1}{\sigma^2}I + C^{-1} \right]^{-1} \frac{\y}{\sigma^2} \right) \right] d\f \\
+		%
+		&= \exp\left[ -\frac{1}{2\sigma^2} \y^T\y + \frac{1}{2} \cdot \frac{\y^T}{\sigma^2}\left[ \frac{1}{\sigma^2}I + C^{-1} \right]^{-1} \frac{\y}{\sigma^2} \right] \times \ldots \\
+		%
+		& \;\int_{\mathbb{R}^N} \underbrace{\exp \left[ -\frac{1}{2} \left( \left[ \f - \left( \frac{1}{\sigma^2}I + C^{-1} \right)^{-1} \frac{\y}{\sigma^2} \right]^T \left[ \frac{1}{\sigma^2}I + C^{-1} \right] \left[ \f - \left( \frac{1}{\sigma^2}I + C^{-1} \right)^{-1} \frac{\y}{\sigma^2} \right] \right) \right]}_{\text{multivariate normal kernel}} d\f \\
+		%
+		&\propto \exp\left[ -\frac{1}{2\sigma^2} \y^T\y + \frac{1}{2} \cdot \frac{\y^T}{\sigma^2}\left[ \frac{1}{\sigma^2}I + C^{-1} \right]^{-1} \frac{\y}{\sigma^2} \right] \\
+		&= \exp \left[ -\frac{1}{2} \y^T \left( \frac{1}{\sigma^2}I - \left[ \frac{1}{\sigma^2}I \right] \left[ \frac{1}{\sigma^2}I + C^{-1} \right] \left [\frac{1}{\sigma^2}I \right] \right)  \y \right] \\
+		&= \exp \left[ \y^T \left( \sigma^2 I + C \right)^{-1} \y \right],
+	\end{align*}
+	%
+	%
+	%
+	using the matrix inverse lemma, $$ \left( A^{-1} + B^{-1} \right)^{-1} = A - A(A + B)^{-1}A. $$ We recognize this as a mean-zero multivariate normal kernel. We can see that the marginal distribution of $\y$ is
+	%
+	%
+	%
+	\begin{align*}
+		\y &\sim \pN \left(\0, \sigma^2 I + C \right).
+	\end{align*}
+	%
+	%
+	\normalsize
 	%
 	%
 	%
@@ -675,15 +962,15 @@ In this problem, consider a general nonlinear regression with one predictor and 
 %%----------------------------------------------------------------------------------------
 %%	LIST CODE
 %%----------------------------------------------------------------------------------------
-
-\pagebreak
-% \rscript{homework03.r}{Sample Perl Script With Highlighting}
-R code for \texttt{myfuns03.R}
-\lstinputlisting[language=R]{myfuns03.R}
-\pagebreak
-R code for \texttt{exercises03.R}
-\lstinputlisting[language=R]{exercises03.R}
-
+%
+% \pagebreak
+% % \rscript{homework03.r}{Sample Perl Script With Highlighting}
+% R code for \texttt{myfuns03.R}
+% \lstinputlisting[language=R]{myfuns03.R}
+% \pagebreak
+% R code for \texttt{exercises03.R}
+% \lstinputlisting[language=R]{exercises03.R}
+%
 
 %----------------------------------------------------------------------------------------
 
