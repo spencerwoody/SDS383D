@@ -609,7 +609,7 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	%
-	The figure below shows the fitted model with 95\% confidence bands (found with $\hat{y} \pm 1.96 \hat{\sigma}$) and overlaid scatterplot of the data. The optimal bandwidth $h = 5.4168$ was chosen with leave-one-out cross validation. The fit is pretty good, with $R^2 = 0.88$, but there are four observations which fall outside the confidence band.
+	The figure below shows the fitted model with 95\% confidence bands and overlaid scatterplot of the data. The optimal bandwidth $h = 5.4168$ was chosen with leave-one-out cross validation. The fit is pretty good, with $R^2 = 0.88$, but there are four observations which fall outside the confidence band.
 	%
 	%
 	%
@@ -704,6 +704,50 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	\item % C
+	%
+	%
+	%
+	We have the likelihood $y | \theta \sim \pN_n (R\theta, \Sigma)$, with $R$ a $n \times p$ matrix, and the prior distribution $\theta \sim \pN_p(m, V)$. Let $\Omega = \Sigma^{-1}$ and $W = V^{-1}$. We can expand out the respective PDFs of these distributions up to a proportionality constant,
+	%
+	%
+	%
+	\begin{align*}
+		p(y|\theta) &\propto \exp \left[ -\frac{1}{2} (y-R\theta)^T \Omega (y - R\theta) \right] \\
+		&= \exp \left[ -\frac{1}{2} (R\theta - y)^T \Omega (R\theta - y) \right] \\
+		&= \exp \left[ -\frac{1}{2} (\theta^T R^T \Omega R \theta - 2y^T\Omega R\theta + y^T\Omega y) \right] \\
+		p(\theta)&\propto \exp \left[ -\frac{1}{2} (\theta - m)^TW(\theta-m)\right] \\
+		&= \exp \left[ -\frac{1}{2} (\theta^TW\theta - 2m^TW\theta + m^TWm) \right]
+	\end{align*}
+	%
+	%
+	%
+	The joint PDF is 
+	%
+	%
+	%
+	\begin{align*}
+		p(y, \theta) &= p(y | \theta) p(\theta) \\
+		&\propto \exp\left[ -\frac{1}{2} \left( \theta^T \left[W + R^T \Omega R \right] \theta - 2m^TW\theta + y^T \Omega y - 2y^T\Omega R\theta \right) \right],
+	\end{align*}
+	%
+	%
+	%
+which may be factorized so that the joint distribution is
+	%
+	%
+	%
+	\begin{align*}
+		\begin{bmatrix}
+			y \\
+			\theta
+		\end{bmatrix} &\sim \pN_{n+p} \left( \begin{bmatrix}
+			Rm \\
+			m
+		\end{bmatrix}, \begin{bmatrix}
+			\Omega & -\Omega R \\
+			-R^T \Omega & W + R^T\Omega R
+		\end{bmatrix}^{-1} \right).
+	\end{align*}
 	%
 	%
 	%
@@ -834,13 +878,13 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	%
-	and furthermore, we can express the joint distribution of $y$ and $\f^\star = [f(x^\star_1), f(x^\star_2), \ldots, f(x^\star_M)]$ as
+	and furthermore, we can express the joint distribution of $\y$ and $\f^\star = [f(x^\star_1), f(x^\star_2), \ldots, f(x^\star_M)]$ as
 	%
 	%
 	%
 	\begin{align*}
 		\begin{bmatrix}
-			y \\
+			\y \\
 			\f^\star
 		\end{bmatrix} \sim \pN \left( \0, \begin{bmatrix}
 			C + \sigma^2I & C_\star^T \\
@@ -895,9 +939,13 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	\begin{align}
-		E(\f^\star) &= C_\star (C + \sigma^2I)^{-1} \y \\
-		\text{cov}(\f^\star) &= C_{\star \star} - C_\star (C + \sigma^2I)^{-1} C_\star^T
+		E(\f^\star | \y) &= C_\star (C + \sigma^2I)^{-1} \y \\
+		\text{cov}(\f^\star | \y) &= C_{\star \star} - C_\star (C + \sigma^2I)^{-1} C_\star^T.
 	\end{align}
+	%
+	%
+	%
+	Note that the expectation is a linear smoother on $\y$.
 	%
 	%
 	%
@@ -951,6 +999,47 @@ In this problem, consider a general nonlinear regression with one predictor and 
 	%
 	%
 	\normalsize
+	%
+	%
+	%
+	\item 
+	%
+	%
+	%
+	The first figure below shows the choice of tuning parameters, and the next figure shows the fitted GP for the utilities data.
+	%
+	%
+	%
+	\begin{figure}[htp!]
+		\centering
+			\includegraphics[scale=0.5]{img/tune1.pdf}
+		\caption{Choice of hyperparameters}
+	\end{figure}
+	%
+	\begin{figure}[htp!]
+		\centering
+			\includegraphics[scale=0.5]{img/Minn_GP.pdf}
+		\caption{Fitted Gaussian Process for Minnesota utilities dataset}
+	\end{figure}
+	%
+	%
+	%
+	\item 
+	%
+	%
+	%
+	\begin{figure}[htp!]
+		\centering
+			\includegraphics[scale=0.45]{img/tplot.pdf}
+			\includegraphics[scale=0.45]{img/pplot.pdf}
+		\caption{Scatterplot of Temperature (left) and Pressure data}
+	\end{figure}
+	%
+	\begin{figure}[htp!]
+		\centering
+			\includegraphics[scale=0.5]{img/GPtemp.pdf}
+		\caption{Fitted GP of Temperature Data}
+	\end{figure}
 	%
 	%
 	%

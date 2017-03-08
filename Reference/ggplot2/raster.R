@@ -6,48 +6,61 @@ library(raster)
 
 scale_fill_brewer(palette="Spectral")
 
-ggplot(faithfuld, aes(waiting, eruptions)) +
-geom_raster(aes(fill = density), interpolate = TRUE) +
-scale_fill_gradientn(colours = terrain.colors(10))
-
-ggplot(faithfuld, aes(waiting, eruptions)) +
-geom_raster(aes(fill = density), interpolate = TRUE) +
-scale_fill_gradientn(colours = rainbow(20)[1:10])
-
-pal <- wes_palette("Zissou", 11, type = "continuous")
-
-w <- ggplot(faithfuld, aes(waiting, eruptions)) +
-	 geom_raster(aes(fill = density), interpolate = TRUE) +
-	 scale_fill_gradientn(colours = pal)
-w
-
-cols <- colorRampPalette(brewer.pal(8,"Dark2"))(length(table.data))
+# ggplot(faithfuld, aes(waiting, eruptions)) +
+# geom_raster(aes(fill = density), interpolate = TRUE) +
+# scale_fill_gradientn(colours = terrain.colors(10))
+#
+# ggplot(faithfuld, aes(waiting, eruptions)) +
+# geom_raster(aes(fill = density), interpolate = TRUE) +
+# scale_fill_gradientn(colours = rainbow(20)[1:10])
+#
+# pal <- wes_palette("Zissou", 11, type = "continuous")
+#
+# w <- ggplot(faithfuld, aes(waiting, eruptions)) +
+# 	 geom_raster(aes(fill = density), interpolate = TRUE) +
+# 	 scale_fill_gradientn(colours = pal)
+# w
 
 cols <- colorRampPalette(brewer.pal(10, "Spectral"))(10)
 cols <- rev(cols)
-
 
 v <- ggplot(faithfuld, aes(waiting, eruptions, z = density)) +
 	geom_raster(aes(fill = density), interpolate = T) +
     geom_contour(colour = "white") +
 	scale_fill_distiller(palette = "Spectral")
 	
+w <- ggplot(faithfuld, aes(waiting, eruptions, z = density)) +
+	geom_raster(aes(fill = density), interpolate = T) +
+    geom_contour(colour = "white") +
+	scale_fill_distiller(palette = "RdYlBu")
+
 	
 	scale_fill_gradientn("Label", colours = cols)
 
+####
+# geom_point with color
+####
+
+set.seed(133)
+df <- data.frame(xval=rnorm(50), yval=rnorm(50))
+
+# Make color depend on yval
+ggplot(df, aes(x=xval, y=yval, colour=yval)) + geom_point()
 
 
-something.m <- melt(something)
+cols <- colorRampPalette(brewer.pal(10, "Spectral"))(20)
 
-p <- ggplot(something.m, aes(x = Var2, y = Var1, fill = value)) + # change fill to z?
-geom_tile() + 
-scale_fill_gradient(low = "snow", high = "dodgerblue3") + 
-xlab("Time point") + 
-ylab("Cluster number") +
-ggtitle("RNA Cluster Centroids")
-p
+# Solid circles
+ggplot(df, aes(x=xval, y=yval, colour = yval)) + geom_point(size = 2) + 
+	scale_colour_gradientn(colours=cols) +
+	theme_bw()
 
-scale_colour_brewer(palette = "Greens")
+# Filled circles with black outline
+ggplot(df, aes(x = xval, y = yval, fill = yval)) + geom_point(pch = 21, size = 5) + 
+scale_fill_gradientn(colours=cols) +
+theme_bw()
+
+
 
 
 # Raster package

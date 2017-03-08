@@ -5,18 +5,14 @@
 library(ggplot2)
 library(reshape2)
 library(gridExtra)
+library(RColorBrewer) # display.brewer.all()
 library(wesanderson) # nice palettes
 library(mvtnorm)
 
-# Prep color palette
-# pal <- wes_palette("Zissou", 5)
-# col1 <- pal[5]
-# col2 <- pal[4]
-# col3 <- pal[1]
+utilities <- read.csv("utilities.csv", header = T)
 
-col1 <- "red"
-col2 <- "orange"
-col3 <- "blue"
+x <- utilities$temp
+y <- log(utilities$gasbill / utilities$billingdays)
 
 source("myfuns03.R")
 
@@ -343,7 +339,7 @@ y <- log(utilities$gasbill / utilities$billingdays)
 # Cross validation ----------------------------------------------------------
 # ---------------------------------------------------------------------------
 
-h.vec <- seq(1, 20, length.out = 500)
+h.vec <- seq(1, 20, length.out = 200)
 num.h <- length(h.vec)
 
 hatmat.list <- list()
@@ -368,8 +364,6 @@ h.opt <- h.vec[which.min(loocv.vec)]
 # Make a plot ---------------------------------------------------------------
 # ---------------------------------------------------------------------------
 
-# h.opt <- 4.9
-
 x.seq <- seq(min(x), max(x), length.out = 200)
 
 y.smooth <- sapply(
@@ -393,8 +387,22 @@ r.sq <- 1 - sum((y - y.hat)^2) / sum((y - mean(y))^2)
 var.est <- sum((y - y.hat)^2) / 
 (length(x) - sum(diag(Hatmat)) + sum(diag(crossprod(Hatmat))))
 
-y.lo <- y.smooth - 1.96 * sqrt(var.est)
-y.hi <- y.smooth + 1.96 * sqrt(var.est)
+
+# Variance of fit
+big.hatmat <- matrix(nrow = length(x.seq), ncol = length(y))
+
+fit.var <- rep(NA, nrow(big.hatmat))
+
+for (i in 1:nrow(big.hatmat)) {
+	big.hatmat[i, ] <- loc.pol(x.seq[i], x, y, D = 1, h.opt, give.mat = TRUE)$hatmat.vec
+	
+	fit.var[i] <- var.est * sum((big.hatmat[i, ])^2)
+}
+
+
+# (fix this)
+y.lo <- y.smooth - 1.96 * sqrt(fit.var)
+y.hi <- y.smooth + 1.96 * sqrt(fit.var)
 
 	
 resplot <- qplot(x, y - y.hat, geom = "blank") + 
@@ -420,7 +428,6 @@ theme(plot.title = element_text(hjust = 0.5),
 text = element_text(family = "Helvetica"),
 legend.position = c(0.25, 0.15))
 
-
 pdf("img/tempplot.pdf")
 q
 dev.off()
@@ -431,8 +438,8 @@ dev.off()
 
 x.seq <- seq(0, 1, length.out = 100)
 
-b <- 0.5
-tau1.sq <- 2e-5
+b <- 0.1
+tau1.sq <- 1
 tau2.sq <- 0
 
 myparams <- c(b, tau1.sq, tau2.sq)
@@ -440,9 +447,63 @@ myparams <- c(b, tau1.sq, tau2.sq)
 xCM52 <- make.covmat(x.seq, C.M52, params = myparams)
 xSE <- make.covmat(x.seq, C.SE, params = myparams)
 
-GP <- rmvnorm(1, mean = rep(0, 100), sigma = xCM52)
+GP1 <- as.vector(rmvnorm(1, mean = rep(0, 100), sigma = xCM52))
+GP2 <- as.vector(rmvnorm(1, mean = rep(0, 100), sigma = xCM52))
 
-plot(x.seq, GP)
+tau1.sq.vec <- c(0.001, 0.1, 1e0, 1e1, 1e2)
+
+GP.mat <- matrix(nrow = length(tau1.sq.vec), ncol = length(x.seq))
+
+for (i in 1:length(tau1.sq.vec)) {
+	b.i <- 1
+	tau1.sq.i <- tau1.sq.vec[i]
+	tau2.sq.i <- 1e-6
+	
+	myparams.i <- c(b, tau1.sq, tau2.sq)
+	
+	xCM52.i <- make.covmat(x.seq, C.M52, params = myparams.i)
+	
+	GP.mat[i, ] <- as.vector(rmvnorm(1, mean = rep(0, 100), sigma = xCM52.i))
+}	
+
+GP1 <- GP.mat[1, ]
+GP2 <- GP.mat[2, ]
+GP3 <- GP.mat[3, ]
+GP4 <- GP.mat[4, ]
+GP5 <- GP.mat[5, ]
+
+cols <- brewer.pal(5, "Set1")
+
+
+h <- qplot(x.seq, geom = "blank") +
+xlab("x") +
+ylab("y") +
+ggtitle(sprintf("Example of Gaussian processes")) +
+geom_line(aes(y = GP1, colour = sprintf("tau1.sq = %f", tau1.sq.vec[1]))) +
+geom_line(aes(y = GP2, colour = sprintf("tau1.sq = %f", tau1.sq.vec[2]))) +
+geom_line(aes(y = GP3, colour = sprintf("tau1.sq = %f", tau1.sq.vec[3]))) + 
+geom_line(aes(y = GP4, colour = sprintf("tau1.sq = %f", tau1.sq.vec[4]))) + 
+geom_line(aes(y = GP5, colour = sprintf("tau1.sq = %f", tau1.sq.vec[5]))) +
+scale_colour_manual(name = "Params", values = cols) +
+theme(legend.position = c(0.25, 0.15),
+	text = element_text(family="Helvetica"))
+
+	
+	qplot(x.seq, as.vector(GP), geom = "blank") + geom_line()
+	plot(x.seq, GP)
+
+
+h <- qplot(x.seq, geom = "blank") +
+xlab("x") +
+ylab("y") +
+ggtitle(sprintf("Example of Gaussian processes")) +
+geom_line(aes(y = GP1, colour = "Gaussian kernel")) +
+geom_line(aes(y = GP2, colour = "Uniform kernel")) + 
+scale_colour_manual(name = "Params", values = c(col3, col2)) +
+theme(legend.position = c(0.25, 0.15),
+	text = element_text(family="Helvetica"))
+
+
 
 # Plot these things
 xCM52.m <- melt(xCM52)
@@ -459,8 +520,252 @@ theme_bw()
 w
 
 
+x <- c()
 
-plot(x.seq, GP, type = "l")
+
+
+# ------------------------------------------------------------------------
+# Application to utilities data set --------------------------------------
+# ------------------------------------------------------------------------
+
+utilities <- read.csv("utilities.csv", header = T)
+
+x <- utilities$temp
+y <- log(utilities$gasbill / utilities$billingdays)
+
+N <- length(x)
+
+b <- 50
+tau1.sq <- 5
+tau2.sq <- 0
+
+myparams <- c(b, tau1.sq, tau2.sq)
+
+# Choose sigma2
+sigma2.init <- 4
+pred1 <- GP.predict(x, y, x, C.M52, params = myparams, res.var = sigma2.init)
+sigma2.est <- sum((y-pred1$post.mean)^2) / (length(x) - 1)
+sigma2.est
+
+# Find tuning parameters
+
+res <- 50
+
+b.vec <- rep(seq(50, 140, length.out = res), res)
+tau1.vec <- rep(seq(2, 6, length.out = res), each = res)
+
+ll.vec <- rep(NA, length(b.vec))
+
+for (i in 1:length(ll.vec)) {
+	b.i <- b.vec[i]
+	tau1.sq.i <- tau1.vec[i]
+	tau2.sq.i <- 0
+
+	myparams.i <- c(b.i, tau1.sq.i, tau2.sq.i)
+	
+	C <- make.covmat(x, C.M52, params = myparams.i)
+
+	ll.vec[i] <-  dmvnorm(y, mean = rep(0, N), 
+						  sigma = C + sigma2.est *diag(N), log = TRUE) 
+}
+
+tune <- data.frame(cbind(b.vec, tau1.vec, ll.vec))
+
+pdf("img/tune1.pdf", width = 7, height = 6)
+ggplot(tune, aes(b.vec, tau1.vec, ll.vec)) + 
+geom_tile(aes(fill = ll.vec)) +
+geom_contour(aes(z = ll.vec), colour = "white") +
+scale_fill_distiller(palette = "Spectral") +
+ggtitle("Find tuning parameters for GP on utilities data (log-likelihood)") +
+xlab("b") +
+ylab("tau1.sq")
+dev.off()
+
+which.max(ll.vec)
+b.vec[which.max(ll.vec)]
+tau1.vec[which.max(ll.vec)]
+
+opt.params <- c(b.vec[which.max(ll.vec)], tau1.vec[which.max(ll.vec)], 0)
+
+# Now make final fit 
+
+x.seq <- seq(min(x), max(x), length.out = 200)
+
+pred2 <- GP.predict(x, y, x.seq, C.M52, params = myparams, res.var = sigma2.est)
+
+fit <- pred2$post.mean
+
+f.lo <- fit - 1.96 * sqrt(pred2$post.var)
+f.hi <- fit + 1.96 * sqrt(pred2$post.var)
+
+GP1 <- qplot(x.seq, geom = "blank") +
+xlab(expression(paste("Temperature (",degree,"F)")))  +
+ylab("log-Daily gas bill (USD)") +
+labs(title = "Daily gas bills for single-family homes in Minnesota") +
+geom_ribbon(aes(ymin = f.lo, ymax = f.hi), fill = "grey80") +
+geom_point(aes(x = x, y = y), pch = 1) + 
+geom_line(aes(y = fit,colour = sprintf("b=%.3f, tau1.sq=%.3f", opt.params[1], opt.params[2])))  + 
+scale_colour_manual(name = "GP with M52", values = "firebrick3") +
+theme(plot.title = element_text(hjust = 0.5), 
+text = element_text(family = "Helvetica"),
+legend.position = c(0.25, 0.15))
+GP1
+
+pdf("img/Minn_GP.pdf")
+GP1
+dev.off()
+
+# Find optimal parameters
+
+# ===========================================================================
+# Weather data ==============================================================
+# ===========================================================================
+
+
+
+weather <- read.csv("weather.csv", header = T)
+
+# Prep the color palette
+cols <- rev(colorRampPalette(brewer.pal(10, "RdYlBu"))(100))
+
+# Temperature
+
+# Plot the data
+pplot <- ggplot(weather, aes(x=lon, y=lat, colour = pressure)) + 
+geom_point(pch = 15, size = 2) + 
+scale_colour_gradientn(colours=cols) +
+theme_bw() 
+
+pdf("img/pplot.pdf", width = 7, height = 5)
+pplot
+dev.off()
+
+tplot <- ggplot(weather, aes(x=lon, y=lat, colour = temperature)) + 
+geom_point(pch = 15, size = 2) + 
+scale_colour_gradientn(colours=cols) +
+theme_bw() 
+
+pdf("img/tplot.pdf", width = 7, height = 5)
+tplot
+dev.off()
+
+# Choose sigma2 and hyperparameters
+myparams <- c(20, 5, 0)
+dist.params <- c(sqrt(2), 1)
+
+sigma2.init <- 3
+wpred1 <- GP.predict2(weather[, 3:4], weather[, 2], weather[, 3:4], C.M52, params = myparams, dist.params = c(1,2), res.var = sigma2.init)
+
+sigma2.est2 <- sum((weather[, 2] - wpred1$post.mean)^2) / (nrow(weather) - 1)
+sigma2.est2
+
+# Choose tuning parameters
+
+N1 <- 30
+
+b.vec <- rep(seq(0.5, 3, length.out = N1), N1)
+tau1.vec <- rep(seq(3, 7, length.out = N1), each = N1)
+
+ll.vec <- rep(NA, length(b.vec))
+
+
+for (i in 1:length(ll.vec)) {
+	b.i <- b.vec[i]
+	tau1.sq.i <- tau1.vec[i]
+	tau2.sq.i <- 0
+
+	myparams.i <- c(b.i, tau1.sq.i, tau2.sq.i)
+	
+	C <- make.covmat2(weather[, 3:4], C.M52, params = myparams.i, dist.params = dist.params <- c(1 / sqrt(2), 1))
+
+	ll.vec[i] <-  dmvnorm(weather[, 2], mean = rep(0, nrow(weather)), 
+					sigma = C + sigma2.est2 * diag(nrow(weather)), log = TRUE) 
+}
+
+tune2 <- data.frame(cbind(b.vec, tau1.vec, ll.vec))
+
+ggplot(tune2, aes(b.vec, tau1.vec, ll.vec)) + 
+geom_tile(aes(fill = ll.vec)) +
+geom_contour(aes(z = ll.vec), colour = "white") +
+scale_fill_distiller(palette = "Spectral") 
+
+which.max(ll.vec)
+
+# Make plot of smooth version
+
+
+# mapImageData1 <- get_map(location = c(lon = -0.016179, lat = 51.538525),
+#     color = "color",
+#     source = "google",
+#     maptype = "satellite",
+#     zoom = 17)
+#
+# ggmap(mapImageData1,
+#     extent = "device",
+#     ylab = "Latitude",
+#     xlab = "Longitude")
+#
+# 	map <- get_map("Atlanta", zoom=10)
+# 	p <- ggmap(map)
+
+
+myparams <- c(b.vec[which.max(ll.vec)], tau1.vec[which.max(ll.vec)], 0)
+
+
+NN <- 64
+
+lon.vec <- rep(seq(min(weather$lon), max(weather$lon), length.out = NN), NN)
+lat.vec <- rep(seq(min(weather$lat), max(weather$lat), length.out = NN), each = NN)
+
+new <- data.frame(cbind(lon.vec, lat.vec))
+names(new)
+names(new) <- names(weather)[c(3, 4)]
+
+fit.vec <- GP.predict2(weather[, 3:4], weather[, 2], new, C.M52, params = myparams, dist.params = c(1,2), res.var = sigma2.est2)$post.mean
+
+
+wfit <- data.frame(cbind(lon.vec, lat.vec, fit.vec))
+
+pdf("img/GPtemp.pdf", width = 8, height = 6)
+ggplot(wfit, aes(lon.vec, lat.vec, fit.vec)) + 
+geom_tile(aes(fill = fit.vec)) + 
+geom_contour(aes(z = fit.vec), colour = "white") +
+scale_fill_distiller(name = "temp", palette = "RdYlBu") +
+theme_bw() +
+ggtitle("Fitted GP for temperature data")
+dev.off()
+
+
+
+
+cols <- rev(colorRampPalette(brewer.pal(10, "RdYlBu"))(100))
+
+bounds <- c(min(weather$lon), min(weather$lat), max(weather$lon), max(weather$lat))
+
+bw.map <- get_map(location = bounds, maptype = "satellite")
+
+ggmap(bw.map) +
+geom_point(data = weather, aes(x = lon, y = lat, colour = temperature), size = 2, pch = 19) + 
+scale_fill_gradientn(colours=cols) 
+
+ggmap(bw.map) + geom_point(data = weather, aes(x = lon, y = lat, fill = temperature), colour = 'gray', size = 2, pch = 21) + 
+scale_fill_gradientn(colours=cols) 
+
+ggmap(bw.map) +
+  geom_tile(data = pred.values, aes(x = lon, y = lat, fill = pred), alpha = 0.6) +
+  scale_fill_distiller(palette = 'RdYlBu') +
+  geom_contour(data = pred.values, aes(x = lon, y = lat, z = pred, colour = ..level..), size = 1) +
+  scale_colour_gradientn(colors = cols) +
+  geom_point(data = weather, aes(x = lon, y = lat, fill = pressure), colour = 'gray', size = 2, pch = 21)
+
+ggmap(bw.map) +
+  geom_contour(data = pred.values, aes(x = lon, y = lat, z = pred, colour = ..level..), size = 1) +
+  scale_colour_gradientn(colors = cols)
+
+
+
+
+
 
 # ===========================================================================
 # Extra code for CV plotting.... ============================================
