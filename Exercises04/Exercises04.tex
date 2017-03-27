@@ -1,0 +1,339 @@
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage{lastpage} % Required to determine the last page for the footer
+\usepackage{extramarks} % Required for headers and footers
+\usepackage[usenames,dvipsnames]{color} % Required for custom colors
+\usepackage{graphicx} % Required to insert images
+\usepackage{amsmath}% http://ctan.org/pkg/amsmath
+\usepackage{listings} % Required for insertion of code
+\usepackage{bm}
+%\usepackage{couriernew} % Required for the courier font
+
+\usepackage{enumerate} % Required for enumerating with letters
+
+\usepackage{mathpazo}
+\usepackage{avant}
+\usepackage{inconsolata}
+
+\newcommand{\tr}{\text{tr}}
+\newcommand{\pN}{\mathcal{N}}
+\newcommand{\R}{\textsf{R} }
+\newcommand{\1}{\mathbf{1}}
+\newcommand{\0}{\mathbf{0}}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\f}{\mathbf{f}}
+\newcommand{\y}{\mathbf{y}}
+
+
+% \newcommand{\1}{\bm{1}}
+% \newcommand{\0}{\bm{0}}
+% \newcommand{\x}{\bm{x}}
+% \newcommand{\f}{\bm{f}}
+% \newcommand{\y}{\bm{y}}
+
+\newcommand{\iid}{\overset{\text{iid}}{\sim}}
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1} % Line spacing
+
+% Set up the header and footer
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName} % Top left header
+\chead{\hmwkClass\ : \hmwkTitle} % Top center head
+\rhead{} % Top right header
+\lfoot{\lastxmark} % Bottom left footer
+\cfoot{} % Bottom center footer
+\rfoot{Page\ \thepage\ of\ \protect\pageref{LastPage}} % Bottom right footer
+\renewcommand\headrulewidth{0.4pt} % Size of the header rule
+\renewcommand\footrulewidth{0.4pt} % Size of the footer rule
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+%----------------------------------------------------------------------------------------
+%	CODE INCLUSION CONFIGURATION
+%----------------------------------------------------------------------------------------
+
+\definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0} % This is the color used for comments
+\lstloadlanguages{R} % Load R syntax for listings, for a list of other languages supported see: ftp://ftp.tex.ac.uk/tex-archive/macros/latex/contrib/listings/listings.pdf
+\lstset{language=R, % Use R in this example
+        frame=single, % Single frame around code
+        basicstyle=\small\ttfamily, % Use small true type font
+        keywordstyle=[1]\color{Blue}, % Perl functions bold and blue
+        keywordstyle=[2]\color{Purple}, % Perl function arguments purple
+        keywordstyle=[3]\color{Blue}\underbar, % Custom functions underlined and blue
+        identifierstyle=, % Nothing special about identifiers                                         
+        commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small, % Comments small dark green courier font
+        stringstyle=\color{Purple}, % Strings are purple
+        showstringspaces=false, % Don't put marks in string spaces
+        tabsize=4, % 5 spaces per tab
+        %
+        % Put standard Perl functions not included in the default language here
+        morekeywords={rand},
+        %
+        % Put Perl function parameters here
+        morekeywords=[2]{on, off, interp},
+        %
+        % Put user defined functions here
+        morekeywords=[3]{test},
+       	%
+        morecomment=[l][\color{Blue}]{...}, % Line continuation (...) like blue comment
+        numbers=left, % Line numbers on left
+        firstnumber=1, % Line numbers start with line 1
+        numberstyle=\tiny\color{Blue}, % Line numbers are blue and small
+        stepnumber=5 % Line numbers go in steps of 5
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\rscript}[2]{
+\begin{itemize}
+\item[]\lstinputlisting[caption=#2,label=#1]{#1.r}
+\end{itemize}
+}
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT STRUCTURE COMMANDS
+%	Skip this unless you know what you're doing
+%----------------------------------------------------------------------------------------
+
+% Header and footer for when a page split occurs within a problem environment
+\newcommand{\enterProblemHeader}[1]{
+\nobreak\extramarks{#1}{#1 continued on next page\ldots}\nobreak
+\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+}
+
+% Header and footer for when a page split occurs between problem environments
+\newcommand{\exitProblemHeader}[1]{
+\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+\nobreak\extramarks{#1}{}\nobreak
+}
+
+\setcounter{secnumdepth}{0} % Removes default section numbers
+\newcounter{homeworkProblemCounter} % Creates a counter to keep track of the number of problems
+
+\newcommand{\homeworkProblemName}{}
+\newenvironment{homeworkProblem}[1][Problem \arabic{homeworkProblemCounter}]{ % Makes a new environment called homeworkProblem which takes 1 argument (custom name) but the default is "Problem #"
+\stepcounter{homeworkProblemCounter} % Increase counter for number of problems
+\renewcommand{\homeworkProblemName}{#1} % Assign \homeworkProblemName the name of the problem
+\section{\homeworkProblemName} % Make a section in the document with the custom problem count
+\enterProblemHeader{\homeworkProblemName} % Header and footer within the environment
+}{
+\exitProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+\newcommand{\problemAnswer}[1]{ % Defines the problem answer command with the content as the only argument
+\noindent\framebox[\columnwidth][c]{\begin{minipage}{0.98\columnwidth}#1\end{minipage}} % Makes the box around the problem answer and puts the content inside
+}
+
+\newcommand{\homeworkSectionName}{}
+\newenvironment{homeworkSection}[1]{ % New environment for sections within homework problems, takes 1 argument - the name of the section
+\renewcommand{\homeworkSectionName}{#1} % Assign \homeworkSectionName to the name of the section from the environment argument
+\subsection{\homeworkSectionName} % Make a subsection with the custom name of the subsection
+\enterProblemHeader{\homeworkProblemName\ [\homeworkSectionName]} % Header and footer within the environment
+}{
+\enterProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+%----------------------------------------------------------------------------------------
+%	NAME AND CLASS SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\hmwkTitle}{Exercises 4 -- Hierarchical Models} % Assignment title
+\newcommand{\hmwkDueDate}{\today} % Due date
+\newcommand{\hmwkClass}{SDS\ 383D} % Course/class
+\newcommand{\hmwkClassTime}{} % Class/lecture time
+\newcommand{\hmwkClassInstructor}{Professor Scott} % Teacher/lecturer
+\newcommand{\hmwkAuthorName}{Spencer Woody} % Your name
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title{
+\vspace{2in}
+\textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+\normalsize\vspace{0.1in}\small{\hmwkDueDate}\\
+\vspace{0.1in}\large{\textit{\hmwkClassInstructor\ }}
+\vspace{3in}
+}
+
+\author{\textbf{\hmwkAuthorName}}
+\date{} % Insert date here if you want it to appear below your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle
+
+\newpage
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 1
+%----------------------------------------------------------------------------------------
+
+
+
+
+\begin{homeworkProblem}
+
+\large
+\textbf{Math Tests}
+\normalsize
+
+We have a model where $y_{ij}$ is the test score of the $j$th student in school $i$, with indices $i = 1, 2, \ldots, I$ and $j = 1, 2, \ldots, N_i,$ so $N_i$ is the sample size for school $i$ and there are $N = \sum_{i=1}^I$ total test scores. Let $\lambda = 1/\sigma^2$ and $\gamma = 1/\tau^2$ be the precision parameters. Further, let $y_i = [y_{i1}, y_{i2}, \ldots, y_{iN_i}]^T$ and $y = [y_1^T, y_2^T, \ldots, y_I^T]^T$ and $\theta = [\theta_1, \theta_2, \ldots, \theta_I]^T.$ As we can see in Figure \ref{fig:mathscatter}, schools with smaller sample sizes tend to have more extreme average test scores.
+
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=0.5]{Math/img/scatter.pdf}
+	\caption{Scatter plot of sample size and average test scores}
+	\label{fig:mathscatter}
+\end{figure}
+
+ The hierarchical model for these data is 
+%
+%
+%
+\begin{align*}
+	(y_{ij} | \theta_i, \lambda) &\sim \pN\left(\theta_i, \lambda^{-1}\right) \\
+	(\theta_i | \mu, \lambda, \gamma) &\sim \pN\left(\mu, (\lambda \gamma)^{-1}\right).
+\end{align*}
+%
+%
+We set the priors 
+%
+%
+%
+\begin{align*}
+	\pi(\mu) &\propto 1,\; -\infty < \mu < \infty \\
+	\pi(\lambda) &\propto \lambda^{-1},\; \lambda > 0 \\
+	\pi(\gamma) &\propto 1,\; \gamma > 0,
+\end{align*}
+%
+%
+%
+that is to say, \ldots. In order to implement the Gibbs sampler, we need the posterior full conditionals for each $\theta_i$, $\mu$, $\lambda$, and $\gamma$.
+%
+%
+%
+\begin{itemize}
+	\item For each $\theta_i,$ 
+	%
+	%
+	%
+	\begin{align*}
+		f(\theta_i | y_i, \mu, \lambda, \gamma) &\propto f(y_i | \theta_i, \lambda) \cdot f(\theta_i | \mu, \lambda, \gamma) \\
+		&\sim \pN \left( (N_i\lambda + \lambda \gamma)^{-1} \cdot (N_i \lambda \bar{y}_i + \lambda \gamma \mu), (N_i\lambda + \lambda \gamma)^{-1} \right),
+	\end{align*}
+	%
+	%
+	%
+	which we know from the normal-normal conjugacy derived in Exercises 1.
+	%
+	%
+	%
+	\item For $\mu$,
+	%
+	%
+	%
+	\begin{align*}
+		\pi(\mu | y, \theta, \lambda, \gamma) &\propto f(\theta | \lambda, \gamma, \mu) \cdot \pi(\mu) \\
+		&\propto \left( \prod_{i = 1}^I \exp \left[ -\frac{1}{2} \lambda \gamma (\theta_i - \mu)^2 \right] \right) \cdot 1 \\
+		&= \exp \left[ -\frac{1}{2} \lambda \gamma \sum_{i=1}^I (\theta_i - \mu)^2 \right] \\
+		&= \exp \left[ -\frac{1}{2} \lambda \gamma \sum_{i=1}^I \left( \theta_i^2 - 2\theta_i \mu + \mu^2 \right) \right] \\
+		&\propto \exp \left[ -\frac{1}{2} \lambda \gamma \left( I\mu^2 - 2I\bar{\theta} \right) \right] \\
+		&\sim \pN \left( \bar{\theta}, (I\lambda \gamma)^{-1} \right).
+	\end{align*}
+	%
+	%
+	%
+	\item For $\lambda$,
+	%
+	%
+	%
+	\begin{align*}
+		\pi(\lambda | y, \mu, \gamma, \theta) &\propto f(y | \lambda, \theta) \cdot f(\theta | \lambda, \gamma, \mu) \cdot \pi(\lambda) \\
+		%
+		&\propto \left( \prod_{i = 1}^I \prod_{j=1}^{N_i} \lambda^{1/2} \exp \left[ -\frac{1}{2} (y_{ij} - \theta_i)^2 \right] \right) \cdot \left( \prod_{i=1}^I \lambda^{1/2} \exp \left[ -\frac{1}{2} \lambda \gamma (\theta_i - \mu)^2 \right] \right) \cdot \lambda^{-1} \\
+		%
+		&= \lambda^{(N+I)/2 - 1} \exp \left[ -\frac{1}{2} \left( \sum_{i=1}^I \sum_{j=1}^{N_i} (y_{ij} - \theta_i)^2 + \gamma \sum_{i=1}^I (\theta_i - \mu)^2 \right) \lambda \right] \\
+		%
+		&\sim \text{Gamma} \left( \frac{N+I}{2}, \frac{1}{2} \left[ \sum_{i=1}^I \sum_{j=1}^{N_i} (y_{ij} - \theta_i)^2 + \gamma \sum_{i=1}^I (\theta_i - \mu)^2 \right] \right).
+	\end{align*}
+	
+	%
+	%
+	%
+	\item For $\gamma$,
+	%
+	%
+	%
+	\begin{align*}
+		\pi(\gamma | y, \mu, \lambda, \theta) &\propto f(\theta | \lambda, \gamma, \mu) \cdot \pi(\gamma) \\
+		%
+		&\propto \left( \prod_{i+1}^I \gamma^{1/2} \exp \left[ - \frac{1}{2} \lambda \gamma (\theta_i - \mu)^2 \right] \right) \cdot 1 \\
+		%
+		&= \gamma^{I/2} \exp\left[- \frac{1}{2} \lambda \sum_{i=1}^I (\theta_i - \mu)^2 \cdot \gamma \right] \\
+		&\sim \text{Gamma}\left( \frac{I}{2} - 1, \frac{1}{2}\lambda \sum_{i=1}^I (\theta_i - \mu)^2  \right).
+	\end{align*}
+	%
+	%
+	%
+\end{itemize}
+
+\begin{table}[htp!]
+\centering
+\caption{95\% posterior credible intervals}
+\begin{tabular}{r|rrr}
+  \hline
+ & 2.5\% & 50\% & 97.5\% \\ 
+  \hline
+$\mu$ & 47.03 & 48.10 & 49.18 \\ 
+  $\lambda$ & 0.0111 & 0.0118 & 0.0126 \\ 
+  $\gamma$ & 2.43 & 3.49 & 5.03 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
+Given the posterior mean $\hat{\theta}_i$ as an estimate of $\theta_i,$ define the shrinkage coefficient $$\kappa_i = \frac{\bar{y}_i - \hat{\theta}_i}{\bar{y}_i},$$ which is a measure incomplete pooling. Figure \ref{fig:mathkappa} shows the absolute shrinkage coefficient for each school as a function of sample size. As sample size increases, the shrinkage decreases because we are gaining precision in estimating the school-level mean $\theta_i.$
+
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=0.65]{Math/img/kappa.pdf}
+	\caption{Absolute shrinkage coefficient as a function of sample size}
+	\label{fig:mathkappa}
+\end{figure}
+
+
+\end{homeworkProblem}
+
+
+%%----------------------------------------------------------------------------------------
+%%	LIST CODE
+%%----------------------------------------------------------------------------------------
+%
+% \pagebreak
+% % \rscript{homework03.r}{Sample Perl Script With Highlighting}
+% R code for \texttt{myfuns03.R}
+% \lstinputlisting[language=R]{myfuns03.R}
+% \pagebreak
+% R code for \texttt{exercises03.R}
+% \lstinputlisting[language=R]{exercises03.R}
+%
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

@@ -542,7 +542,7 @@ tau2.sq <- 0
 myparams <- c(b, tau1.sq, tau2.sq)
 
 # Choose sigma2
-sigma2.init <- 4
+sigma2.init <- 1
 pred1 <- GP.predict(x, y, x, C.M52, params = myparams, res.var = sigma2.init)
 sigma2.est <- sum((y-pred1$post.mean)^2) / (length(x) - 1)
 sigma2.est
@@ -605,10 +605,11 @@ labs(title = "Daily gas bills for single-family homes in Minnesota") +
 geom_ribbon(aes(ymin = f.lo, ymax = f.hi), fill = "grey80") +
 geom_point(aes(x = x, y = y), pch = 1) + 
 geom_line(aes(y = fit,colour = sprintf("b=%.3f, tau1.sq=%.3f", opt.params[1], opt.params[2])))  + 
+theme_bw() +
 scale_colour_manual(name = "GP with M52", values = "firebrick3") +
 theme(plot.title = element_text(hjust = 0.5), 
 text = element_text(family = "Helvetica"),
-legend.position = c(0.25, 0.15))
+legend.position = c(0.25, 0.15)) 
 GP1
 
 pdf("img/Minn_GP.pdf")
