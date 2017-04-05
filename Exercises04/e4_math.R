@@ -1,5 +1,5 @@
 ###########################################################
-######### Created by Spencer Woody on 11 Feb 2017 #########
+######### Created by Spencer Woody on 27 Mar 2017 #########
 ###########################################################
 
 library(ggplot2)
@@ -82,6 +82,7 @@ for (iter in 2:niter) {
 	# Update lambda
 	S.y <- sum( (y - rep(thetas[iter, ], times = Ni)) ^ 2 )
 	S.theta <- sum( (thetas[iter, ] - mu[iter]) ^ 2 )
+	
 	rate.lambda <- (S.y + gamma[iter - 1] * S.theta) / 2
 	
 	lambda[iter] <- rgamma(1, 
@@ -92,7 +93,7 @@ for (iter in 2:niter) {
 	rate.gamma <- lambda[iter] * sum((thetas[iter, ] - mu[iter]) ^ 2) / 2
 	
 	gamma[iter] <- rgamma(1, 
-						  I / 2 - 1,
+						  I / 2 + 1,
 						  rate.gamma)
 						  
 	if (iter %% 1000 == 0) {
@@ -105,6 +106,10 @@ thetas <- thetas[(nburn+1):niter, ]
 mu <- mu[(nburn+1):niter]
 lambda <- lambda[(nburn+1):niter]
 gamma <- gamma[(nburn+1):niter]
+
+## ---------------------------------------------------------------------------
+## Summary of results from Gibbs 
+## ---------------------------------------------------------------------------
 
 # plot(mu, type = "l")
 # plot(lambda, type = "l")
@@ -120,23 +125,43 @@ rownames(post.summary) <- c("mu", "lambda", "gamma")
 post.summary
 
 # Make plots of posterior distributions
-mu.plot <- qplot(mu, bins = 15, fill = I("grey30"), col = I("grey90")) + ggtitle("Posterior distribution of mu") + 
+mu.plot <- qplot(mu, 
+	bins = 15, 
+	fill = I("grey30"), 
+	col = I("grey90")) + 
+ggtitle("Posterior distribution of mu") + 
 xlab("mu") +
 theme_bw() +
 theme(plot.title = element_text(hjust = 0.5)) 
 
-lambda.plot <- qplot(lambda, bins = 15, fill = I("grey30"), col = I("grey90")) + ggtitle("Posterior distribution of lambda") + 
+lambda.plot <- qplot(lambda, 
+	bins = 15, 
+	fill = I("grey30"), 
+	col = I("grey90")) + 
+ggtitle("Posterior distribution of lambda") + 
 xlab("lambda") +
 theme_bw() +
 theme(plot.title = element_text(hjust = 0.5)) 
 
-gamma.plot <- qplot(gamma, bins = 15, fill = I("grey30"), col = I("grey90")) + ggtitle("Posterior distribution of gamma") + 
+gamma.plot <- qplot(gamma, 
+	bins = 15, 
+	fill = I("grey30"), 
+	col = I("grey90")) + 
+ggtitle("Posterior distribution of gamma") + 
 xlab("gamma") +
 theme_bw() +
 theme(plot.title = element_text(hjust = 0.5)) 
 
-# Plot shrinkage coefficients
-thetas.hat <- apply(thetas, 2, mean)
+# Plot the thetas
+thetas.hat <- colMeans(thetas)
+
+hist(thetas.hat)
+
+## ---------------------------------------------------------------------------
+## Plot shrinkage coefficients
+## ---------------------------------------------------------------------------
+
+thetas.hat <- colMeans(thetas)
 kappa <- abs(1 - thetas.hat / ybar)
 
 math.df2 <- data.frame(cbind(math.df, kappa = kappa))
@@ -152,4 +177,12 @@ theme(plot.title = element_text(hjust = 0.5))
 pdf("Math/img/kappa.pdf")
 kappa.plot
 dev.off()
+
+## ---------------------------------------------------------------------------
+## Boxplot
+## ---------------------------------------------------------------------------
+
+box <- ggplot(math, aes(factor(school), mathscore)) +
+geom_boxplot() +
+geom_point(data = math.df2, aes(school, score.av), col = "red")
 

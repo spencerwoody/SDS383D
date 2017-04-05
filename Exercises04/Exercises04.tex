@@ -22,6 +22,7 @@
 
 \newcommand{\tr}{\text{tr}}
 \newcommand{\pN}{\mathcal{N}}
+\newcommand{\I}{\mathcal{I}}
 \newcommand{\R}{\textsf{R} }
 \newcommand{\1}{\mathbf{1}}
 \newcommand{\0}{\mathbf{0}}
@@ -185,9 +186,6 @@
 %	PROBLEM 1
 %----------------------------------------------------------------------------------------
 
-
-
-
 \begin{homeworkProblem}
 
 \large
@@ -254,7 +252,7 @@ that is to say, \ldots. In order to implement the Gibbs sampler, we need the pos
 		&\propto \left( \prod_{i = 1}^I \exp \left[ -\frac{1}{2} \lambda \gamma (\theta_i - \mu)^2 \right] \right) \cdot 1 \\
 		&= \exp \left[ -\frac{1}{2} \lambda \gamma \sum_{i=1}^I (\theta_i - \mu)^2 \right] \\
 		&= \exp \left[ -\frac{1}{2} \lambda \gamma \sum_{i=1}^I \left( \theta_i^2 - 2\theta_i \mu + \mu^2 \right) \right] \\
-		&\propto \exp \left[ -\frac{1}{2} \lambda \gamma \left( I\mu^2 - 2I\bar{\theta} \right) \right] \\
+		&\propto \exp \left[ -\frac{1}{2} \lambda \gamma \left( I\mu^2 - 2I\bar{\theta} \mu \right) \right] \\
 		&\sim \pN \left( \bar{\theta}, (I\lambda \gamma)^{-1} \right).
 	\end{align*}
 	%
@@ -287,7 +285,7 @@ that is to say, \ldots. In order to implement the Gibbs sampler, we need the pos
 		&\propto \left( \prod_{i+1}^I \gamma^{1/2} \exp \left[ - \frac{1}{2} \lambda \gamma (\theta_i - \mu)^2 \right] \right) \cdot 1 \\
 		%
 		&= \gamma^{I/2} \exp\left[- \frac{1}{2} \lambda \sum_{i=1}^I (\theta_i - \mu)^2 \cdot \gamma \right] \\
-		&\sim \text{Gamma}\left( \frac{I}{2} - 1, \frac{1}{2}\lambda \sum_{i=1}^I (\theta_i - \mu)^2  \right).
+		&\sim \text{Gamma}\left( \frac{I}{2} + 1, \frac{1}{2}\lambda \sum_{i=1}^I (\theta_i - \mu)^2  \right).
 	\end{align*}
 	%
 	%
@@ -320,6 +318,150 @@ Given the posterior mean $\hat{\theta}_i$ as an estimate of $\theta_i,$ define t
 
 \end{homeworkProblem}
 
+%----------------------------------------------------------------------------------------
+%	PROBLEM 2
+%----------------------------------------------------------------------------------------
+
+\pagebreak
+
+\begin{homeworkProblem}
+
+\large
+\textbf{Price elasticity of demand}
+\normalsize
+
+Here we model the demand curve for cheese, which is given by $$ Q =  \alpha P ^\beta,$$ where $Q$ is the quantity of cheese demanded, $P$ is price, $\beta$ is a parameter for the \emph{price elasticity of demand} and $\alpha$ is a (rather unremarkable) scaling parameter. The hierarchical linear model for the quantity of cheese sold for the $t$th observation at store $i$ is
+%
+\begin{align*}
+	y_{it} &= \alpha_i + \beta_i x_{it} + \gamma_i z_{it} + \theta_i z_{it} x_{it} + \epsilon_{it},
+\end{align*} 
+% 
+where $x_{it}$ is the log-price of cheese and $z_{it}$ is an indicator variable taking on a value of 1 when the display is shown, and 0 otherwise.
+%
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=0.5]{Cheese/img/cheesescatter.pdf}
+	\caption{Scatterplot for data from all stores}
+	\label{fig:cheesescatter}
+\end{figure}
+%
+Using REML, 
+%
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=0.5]{Cheese/img/cheeseresid1.pdf}
+	\caption{Residual plot using HLM and REML method}
+	\label{fig:cheeseresid1}
+\end{figure}
+
+\pagebreak
+
+\emph{Full Bayesian}
+
+\textbf{Model specification} 
+
+Let $y_i$ be a $n_i$-length vector representing the the responses of group $i.$ There are $N = \sum_{i}^I n_i$ total responses. $X_i$ is the $n_i \times p$ design matrix for the observations in group $i$, and $Z_i$ is a $n_i \times q,$ $q \leq p$ matrix whose columns are a subset of the columns of $X_i$, and this represents the subject-level effects. Then the responses $y_i$ are distributed as: 
+%
+\begin{align*}
+	y_{i} | \beta, b_i, \lambda &\sim \pN_{n_i}(X_i \beta + Z_ib_i, \lambda^{-1}\I_{n_i}) \\
+	b_i | D &\iid \pN_{q} (0, D)
+\end{align*}
+%
+%
+%
+Note that the responses $y_{it}$ for subject $i$ are therefore assumed to iid, and also note two results of this model, 
+%
+%
+\begin{align*}
+	E(y_{i} | b_i) &= X_i \beta + Z_ib_i \\
+	E(y_{i}) &= E(E(y_{i} | b_i)) = X_i \beta,
+\end{align*}
+%
+%
+or in other words, 
+%
+%
+The priors are
+%
+%
+\begin{align*}
+	\pi(\lambda) &\propto \lambda^{-1} \\
+	\pi(\beta) &\propto 1 \\
+	\pi(D) &\sim \text{IW}(\nu, \Psi).
+\end{align*}
+% 
+%
+To implement a Gibbs sampler, we need the full conditional posterior distributions for $b_i$, $\lambda$, $\beta$, and $D$.
+%
+%
+\begin{itemize}
+	\item %
+	For each $b_i$, first define $v_i := y_i - X_i \beta,$
+	%
+	%
+	\begin{align*}
+		p(b_i | y_i, \lambda, \beta, D) &\propto p(y_i | \beta, b_i, \lambda) p(b_i | D) \\ 
+		%
+		&\propto \exp \left[ -\frac{1}{2} \lambda \left( y_i - X_i \beta - Z_i b_i \right)^T \left( y_i - X_i \beta - Z_i b_i \right)  \right] \cdot \exp \left[ -\frac{1}{2} b_i^T D^{-1} b_i \right] \\
+		%
+		&= \exp \left[ -\frac{1}{2} \lambda \left( Z_i b_i - v_i \right)^T \left( Z_i b_i - v_i \right)  \right] \cdot \exp \left[ -\frac{1}{2} b_i^T D^{-1} b_i \right] \\
+		%
+		&\propto \exp\left[ -\frac{1}{2} b_i^T \left( \lambda Z_i^TZ_i + D^{-1} \right) b_i - 2b_i^T\lambda Z_i^T v_i \right] \\
+		%
+		&\propto \exp \left[ -\frac{1}{2} \left( b_i - \left[ \lambda Z_i^T Z_i + D^{-1} \right]^{-1} \lambda Z_i^T v_i \right)^T \left( \lambda Z_i^T Z_i + D^{-1}  \right) \left( b_i - \left[ \lambda Z_i^T Z_i + D^{-1} \right]^{-1} \lambda Z_i^T v_i \right) \right] \\
+		% 
+		&\sim \pN \left( \left[ \lambda Z_i^T Z_i + D^{-1} \right]^{-1} \lambda Z_i^T v_i, \left[ \lambda Z_i^T Z_i + D^{-1} \right]^{-1} \right). \\
+		%
+		&\sim \pN \left( \left[ \lambda Z_i^T Z_i + D^{-1} \right]^{-1} \lambda Z_i^T (y_i - X_i \beta), \left[ \lambda Z_i^T Z_i + D^{-1} \right]^{-1} \right).
+	\end{align*}
+	%
+	%
+	\item 
+	For $\lambda,$
+	%
+	%
+	\begin{align*}
+		\pi(\lambda| y, \beta, b) &\propto p(y | \lambda, \beta, \b) \cdot \pi(\lambda) \\
+		&= \left( \prod_{i=1}^I \lambda^{n_i/2} \exp \left[ -\frac{1}{2} \lambda (y_i - X_i\beta - Z_ib_i)^T (y_i - X_i\beta - Z_ib_i) \right] \right) \cdot \lambda^{-1} \\
+		%
+		&\sim \text{Gamma}\left( \frac{N}{2}, \frac{1}{2} \sum_{i=1}^I \| y_i - X_i\beta - Z_ib_i \|^2_2 \right)
+	\end{align*}
+	%
+	%
+	\item %
+	For $\beta,$ define $w_i := y_i - Z_ib_i. $
+	%
+	%
+	\begin{align*}
+		\pi(\beta| y, \lambda, b) &\propto p(y | \lambda, \beta, \b) \cdot \pi(\beta) \\
+		%
+		&\propto \left( \prod_{i=1}^I \exp \left[ -\frac{1}{2} \lambda (y_i - X_i\beta - Z_ib_i)^T (y_i - X_i\beta - Z_ib_i) \right] \right) \cdot 1 \\
+		%
+		&= \prod_{i=1}^I \exp \left[ -\frac{1}{2} \lambda (X_i\beta - w_i)^T (X_i\beta - w_i) \right] \\
+		%
+		&\propto \prod_{i=1}^I \exp \left[ -\frac{1}{2} \lambda \left( \beta^T X_i^T X_i \beta - 2\beta^TX_i^T w_i \right) \right] \\
+		%
+		&= \exp\left( -\frac{1}{2} \lambda \left[ \beta^T \left( \sum_{i=1}^I X_i^T X_i \right)\beta - 2\beta^T \sum_{i=1}^I X_i^T w_i \right] \right) \\
+		%
+		&=  \exp\left( -\frac{1}{2} \lambda \left[ \beta^T \left( \sum_{i=1}^I X_i^T X_i \right)\beta - 2\beta^T \sum_{i=1}^I X_i^T (y_i - Z_ib_i) \right] \right) \\ 
+		%
+		&\sim \pN \left( \left[ \sum_{i=1}^I X_i^T X_i \right]^{-1} \sum_{i=1}^I X_i^T (y_i - Z_ib_i), \left[ \lambda \sum_{i=1}^I X_i^T X_i \right]^{-1} \right).
+	\end{align*}
+	%
+	%
+	\item
+	For $D,$
+	%
+	%
+	\begin{align*}
+		\pi(D | b) &\propto p(b | D) \cdot \pi(D) \\
+		&\propto \left( \prod_{i=1}^I [\det(D)]^{-1/2} \exp \left[ -\frac{1}{2} b_i^T D^{-1} b_i \right] \right) \cdot [\det(D)]^{- \frac{\nu + q + 1}{2}} \exp\left[ -\frac{1}{2} \tr(\Psi D^{-1}) \right] \\
+		&\sim \text{IW}\left( I + \nu, \Psi + \sum_{i=1}^I b_ib_i^T \right)
+	\end{align*}
+\end{itemize}
+
+
+\end{homeworkProblem}
 
 %%----------------------------------------------------------------------------------------
 %%	LIST CODE
