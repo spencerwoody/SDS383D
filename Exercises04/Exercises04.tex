@@ -330,7 +330,7 @@ Given the posterior mean $\hat{\theta}_i$ as an estimate of $\theta_i,$ define t
 \textbf{Price elasticity of demand}
 \normalsize
 
-Here we model the demand curve for cheese, which is given by $$ Q =  \alpha P ^\beta,$$ where $Q$ is the quantity of cheese demanded, $P$ is price, $\beta$ is a parameter for the \emph{price elasticity of demand} and $\alpha$ is a (rather unremarkable) scaling parameter. The hierarchical linear model for the quantity of cheese sold for the $t$th observation at store $i$ is
+Here we model the demand curve for cheese, which is given by $$ Q =  \alpha P ^\beta,$$ where $Q$ is the quantity of cheese demanded, $P$ is price, $\beta$ is a parameter for the \emph{price elasticity of demand} and $\alpha$ is a (rather unremarkable) scaling parameter. Note that if we take a logarithmic transform of the equation in our demand model, we obtain the linear replationship $$ \log Q = \log \alpha + \beta \log P. $$ Figure \ref{fig:cheesescatter} shows all the data with a fitted OLS line, and Figure \ref{fig:OLSfacetplot} shows the data on a store-by-store level with the same OLS line from all data on each panel. The fact that the OLS line performs poorly on any given individual store's data suggests that a hierarchical approach would be beneficial. The hierarchical linear model for the quantity of cheese sold for the $t$th observation at store $i$ is
 %
 \begin{align*}
 	y_{it} &= \alpha_i + \beta_i x_{it} + \gamma_i z_{it} + \theta_i z_{it} x_{it} + \epsilon_{it},
@@ -340,12 +340,19 @@ where $x_{it}$ is the log-price of cheese and $z_{it}$ is an indicator variable 
 %
 \begin{figure}[htp!]
 	\centering
-		\includegraphics[scale=0.5]{Cheese/img/cheesescatter.pdf}
-	\caption{Scatterplot for data from all stores}
+		\includegraphics[scale=0.5]{Cheese/img/OLSplot.pdf}
+	\caption{Scatterplot for data from all stores with OLS line}
 	\label{fig:cheesescatter}
 \end{figure}
+
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=0.7]{Cheese/img/OLSfacetplot.pdf}
+	\caption{Scatterplot for data from all stores with OLS line}
+	\label{fig:OLSfacetplot}
+\end{figure}
 %
-Using REML, 
+Using freqentist REML to build this model we obtain these results, 
 %
 \begin{figure}[htp!]
 	\centering
@@ -360,7 +367,7 @@ Using REML,
 
 \textbf{Model specification} 
 
-Let $y_i$ be a $n_i$-length vector representing the the responses of group $i.$ There are $N = \sum_{i}^I n_i$ total responses. $X_i$ is the $n_i \times p$ design matrix for the observations in group $i$, and $Z_i$ is a $n_i \times q,$ $q \leq p$ matrix whose columns are a subset of the columns of $X_i$, and this represents the subject-level effects. Then the responses $y_i$ are distributed as: 
+Here we specify a general Bayesian hierarchical linear model. Let $y_i$ be a $n_i$-length vector representing the the responses of group $i.$ There are $N = \sum_{i}^I n_i$ total responses. $X_i$ is the $n_i \times p$ design matrix for the observations in group $i$, and $Z_i$ is a $n_i \times q,$ $q \leq p$ matrix whose columns are a subset of the columns of $X_i$, and this represents the subject-level effects, sometimes called ``random effects.''. Then the responses $y_i$ are distributed as: 
 %
 \begin{align*}
 	y_{i} | \beta, b_i, \lambda &\sim \pN_{n_i}(X_i \beta + Z_ib_i, \lambda^{-1}\I_{n_i}) \\
@@ -459,6 +466,30 @@ To implement a Gibbs sampler, we need the full conditional posterior distributio
 		&\sim \text{IW}\left( I + \nu, \Psi + \sum_{i=1}^I b_ib_i^T \right)
 	\end{align*}
 \end{itemize}
+
+The most computationally intensive part of this Gibbs sampler scheme is sampling each $b_i,$ and I chose to do this by exploiting a block-diagonal matrix of each $Z_i$ and drawing each $b_i$ simultaneously as a long vector called $b$. For this application specifically, the $X_i$ and $Z_i$ are identical, with a column of 1's for the intercept, a column of log-prices, a column of indicator variables for display, and a column of interaction terms for log-price and display. We run 6000 iterations of the Gibbs sampler with the first 1000 draws discared as burn-in. The \texttt{mix} folder within the \texttt{img} folder shows traceplots of $\lambda$, each component in $\beta$, and four randomly selected columns of posterior draws of $b$, which all show a good degree of mixing. Histograms for $lambda$ and each component of $\beta$ are shown below. Figure \ref{fig:CIgrid} shows a grid of plots, each of which has 95\% credible intervals of all the subject-level effects on a given covariate terms, arranged in increasing order by posterior median. Note that on the $x$-axis is different for each plot in order to have each one ordered by posterior median. 
+
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=0.4]{Cheese/img/hist/lambdahist.pdf}
+	\caption{Histogram of posterior draws of $\lambda$}
+\end{figure}
+
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=0.4]{Cheese/img/hist/inthist.pdf}
+		\includegraphics[scale=0.4]{Cheese/img/hist/logpricehist.pdf} \\
+		\includegraphics[scale=0.4]{Cheese/img/hist/disphist.pdf}
+		\includegraphics[scale=0.4]{Cheese/img/hist/logprice_disphist.pdf}
+	\caption{Histogram of posterior draws of each term in $\beta$}
+\end{figure}
+
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=0.6]{Cheese/img/CIgrid.pdf}
+	\caption{Ordered 95\% credible intervals of store-level each store }
+	\label{fig:CIgrid}
+\end{figure}
 
 
 \end{homeworkProblem}

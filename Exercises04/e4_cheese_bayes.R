@@ -4,6 +4,7 @@
 
 library(ggplot2)
 library(RColorBrewer) # display.brewer.all()
+library(Matrix)
 library(sparseMVN)
 library(mvtnorm)
 library(gridExtra)
@@ -200,16 +201,6 @@ D <- D[, , -(1:nburn)]
 
 length.post <- length(lambda)
 
-# library(microbenchmark)
-#
-# microbenchmark(mychol <- Cholesky(b.prec))
-# microbenchmark(b.mean <- lambda.n * solve(b.prec, crossprod(Z.block, v)))
-# microbenchmark(covmat <- solve(b.prec))
-# microbenchmark(samp <- rmvnorm(1, b.mean, as.matrix(covmat)))
-# microbenchmark(D.n <- rWishart(1, nu + I, Psi + tcrossprod(B.n)))
-
-
-
 ### --------------------------------------------------------------------------
 ### Traceplots and histograms
 ### --------------------------------------------------------------------------
@@ -249,6 +240,75 @@ ylab("logprice.disp") +
 ggtitle("Traceplot for Gibbs sampler for logprice.disp") +
 theme(plot.title = element_text(hjust = 0.5))
 logprice.dispmix
+
+# Choose four vectors from b to show traceplots of
+mysample <- sample(1:ncol(b), 4, replace = F)
+
+randb1mix <- qplot(1:length.post, b[, mysample[1]], geom = "path") + 
+xlab("iteration") +
+ylab(sprintf("%ith component in b", mysample[1])) +
+ggtitle(sprintf("Traceplot for Gibbs sampler for %ith component in b", mysample[1])) +
+theme(plot.title = element_text(hjust = 0.5))
+randb1mix
+
+randb2mix <- qplot(1:length.post, b[, mysample[2]], geom = "path") + 
+xlab("iteration") +
+ylab(sprintf("%ith component in b", mysample[2])) +
+ggtitle(sprintf("Traceplot for Gibbs sampler for %ith component in b", mysample[2])) +
+theme(plot.title = element_text(hjust = 0.5))
+randb2mix
+
+randb3mix <- qplot(1:length.post, b[, mysample[3]], geom = "path") + 
+xlab("iteration") +
+ylab(sprintf("%ith component in b", mysample[3])) +
+ggtitle(sprintf("Traceplot for Gibbs sampler for %ith component in b", mysample[3])) +
+theme(plot.title = element_text(hjust = 0.5))
+randb3mix
+
+randb4mix <- qplot(1:length.post, b[, mysample[4]], geom = "path") + 
+xlab("iteration") +
+ylab(sprintf("%ith component in b", mysample[4])) +
+ggtitle(sprintf("Traceplot for Gibbs sampler for %ith component in b", mysample[4])) +
+theme(plot.title = element_text(hjust = 0.5))
+randb4mix
+
+# Save these to pdfs
+
+pdf("Cheese/img/mix/lambdamix.pdf")
+lambdamix
+dev.off()
+
+pdf("Cheese/img/mix/intmix.pdf")
+intmix
+dev.off()
+
+pdf("Cheese/img/mix/logpricemix.pdf")
+logpricemix
+dev.off()
+
+pdf("Cheese/img/mix/dispmix.pdf")
+dispmix
+dev.off()
+
+pdf("Cheese/img/mix/logprice_dispmix.pdf")
+logprice.dispmix
+dev.off()
+
+pdf("Cheese/img/mix/randb1mix.pdf")
+randb1mix
+dev.off()
+
+pdf("Cheese/img/mix/randb2mix.pdf")
+randb2mix
+dev.off()
+
+pdf("Cheese/img/mix/randb3mix.pdf")
+randb3mix
+dev.off()
+
+pdf("Cheese/img/mix/randb4mix.pdf")
+randb4mix
+dev.off()
 
 # Histograms
 
@@ -316,6 +376,26 @@ ggtitle("Posterior draws for logprice.disp") +
 theme_bw() +
 theme(plot.title = element_text(hjust = 0.5))
 logprice.disphist
+
+pdf("Cheese/img/hist/lambdahist.pdf")
+lambdahist
+dev.off()
+
+pdf("Cheese/img/hist/inthist.pdf")
+inthist
+dev.off()
+
+pdf("Cheese/img/hist/logpricehist.pdf")
+logpricehist
+dev.off()
+
+pdf("Cheese/img/hist/disphist.pdf")
+disphist
+dev.off()
+
+pdf("Cheese/img/hist/logprice_disphist.pdf")
+logprice.disphist
+dev.off()
 
 ### --------------------------------------------------------------------------
 ### Credible intervals ("grand mean")
