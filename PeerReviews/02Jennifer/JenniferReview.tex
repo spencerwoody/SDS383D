@@ -1,9 +1,9 @@
-\title{Peer Review 1 for Yinan}
+\title{Peer Review 2 for Jennifer}
 \author{
         Spencer Woody \\
                 SDS 383D
 }
-\date{\today}
+\date{April 12, 2017}
 
 \documentclass[11pt]{article}
 
@@ -86,21 +86,6 @@ When I was reading through your write-up, I had trouble remembering what questio
 \section{The Bootstrap}
 
 If I remember correctly, you made a presentation on the bootstrap for the MLE of the mean vector and covariance matrix of the multivariate. I thought it was interesting that you showed the \emph{actual} sampling distribution of the MLEs (normal for the mean vector, Wishart for the covariance matrix). However, the entire point of the bootstrap is to \emph{approximate} these sorts of sampling distributions by using Monte Carlo resampling with replacement from the empirical distribution. So what I did for my bootstrap was to just do approximately 10,000 resamples, and each time compute the MLEs and store them to a matrix. From this you can make a histogram of each component. For example, the first figure below shows the sampling distribution of each element of the mean vector, and the second figure shows the sampling distribution of each element in the covariance matrix, with the dashed blue line representing the median of Monte Carlo estimates, and the red solid line representing the true value. 
-\pagebreak
-
-\begin{figure}[htp!]
-	\centering
-		\includegraphics[scale=0.6]{mu.pdf}
-	\caption{Bootstrap estimate of the sampling distribution of MLE of mean vector from a sample of mutivariate normal variables}
-\end{figure}
-
-\pagebreak
-
-\begin{figure}[htp!]
-	\centering
-		\includegraphics[scale=0.6]{Sigma.pdf}
-	\caption{Bootstrap estimate of the sampling distribution of MLE of covariance matrix from a sample of mutivariate normal variables}
-\end{figure}
 
 \pagebreak
 

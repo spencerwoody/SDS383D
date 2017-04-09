@@ -19,13 +19,16 @@ states <- polls$state
 
 N <- nrow(polls)
 
-X <- cbind(rep(1, n),
+# Design matrix
+X <- cbind(rep(1, N),
 polls$edu == "HS", polls$edu == "SomeColl", polls$edu == "Bacc",
 polls$age == "30to44", polls$age == "45to64", polls$age == "65plus",
 polls$female,
 polls$black)
 
+# Response vector
 y <- polls$bush
+
 
 colnames(X) <- c("(Intercept)", "HS", "SomeColl", "Bacc", "30to44", "45to64",
 "65plus", "female", "black")
