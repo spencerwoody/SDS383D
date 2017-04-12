@@ -7,6 +7,7 @@
 
 \documentclass[11pt]{article}
 
+\usepackage[margin=1.6in]{geometry}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{listings}
@@ -27,81 +28,49 @@
 
 \section{Introduction}
 
-Hi Yinan, I enjoyed reviewing your problem set and code. It looks like you understand the topics very well. Still, I have a few pieces of feedback to give for you to improve your \LaTeX and \textsf{R}, and create good write-ups for these exercises in the future.
 
-\section{General notation tips}
 
-\subsection{Vectors}
+Hi Jennifer, thanks for letting me review your write-up and code. This write-up will just list the things we discussed the other day, and give links to specific resources I mentioned.
 
-It is best to \emph{not} use the notation $\vec{x}$ to denote a vector because it is easy to confuse this with the sample mean, $\bar{x} = \sum_{i=1}^n x_i / n$. Instead, you can use a bold-faced $\mathbf{x}$ or simply $x$, and then the scalar components are referenced with subscripts, e.g. $x_i$. I will post the \texttt{.tex} file I used to make this report on my Github so that you can see how I produced all of these. 
+\section{Tips for \textsf{R}}
 
-\subsection{Proportionality sign, $\propto$}
+\begin{itemize}
+	\item 
+	In your Gibbs sampler, I noticed that you are sampling the covariance matrix $\Sigma$ from the inverse-Wishart distribution using the \texttt{MCMCpack} package at each step and then inverting it to sample from the full conditional of each $b_i$. Instead of doing this, you can sample the precision matrix $\Sigma^{-1}$ from the Wishart using \href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/rWishart.html}{\texttt{rWishart}} command, which is also in base \textsf{R} so you do not have to load any special package for it.
+	\item
+	Also relating to your Gibbs sampler, I suggest you initialize your vectors, matrices, and arrays for storing MCMC samples from the posterior with \texttt{NA} values instead of each element being 0. For example, the command \begin{verbatim}
+			matrix(nrow = n, ncol = p)
+	\end{verbatim} will give a $n \times p$ matrix of all \texttt{NA} values. This will help save memory and also make it easier to find bugs in your code.
+	\item
+	Since you are looping over the $b_i$'s, I suggest you try using the \href{https://cran.r-project.org/web/packages/foreach/vignettes/foreach.pdf}{\texttt{foreach} package}), which allows you to parallelize loop tasks. Since you have a MacBook Pro, this should cut your computation time by a significant amount. The link I gave goes in depth on how to use the package.
+	\item
+	Printing the iteration to your console each time can slow down your Gibbs sampler a bit and also crowd out other output you may want to go back to, so instead you can add an \texttt{if} statement and the modulo command (e.g. \texttt{a \%\% n} is the same as $a \text{ mod } n$) to print, say, only each 1000th iteration. Speaking of which,\ldots
+	\item
+	Use \href{http://www.cookbook-r.com/Strings/Creating_strings_from_variables/}{\texttt{sprintf}} in \textsf{R} to create strings from variables. It's very handy and you can also use this in \textsf{C}! 
+	\item 
+	This is a fastidious bit of feedback, but I strongly suggest following certain guidelines for your code, like always having a space after commas. The \href{https://google.github.io/styleguide/Rguide.xml}{Google \textsf{R} Style Guide} is my Bible.
+\end{itemize}
 
-It looks like in most of your write-up, you used the full version of Bayes' Theorem, i.e.,
-%
-\begin{align*}
-	p(\theta | x) &= \frac{p(x|\theta)p(\theta)}{\int_\Theta p(x|\theta)p(\theta) d\theta}.
-\end{align*}
-%
-While this form is very explicit, it is both convenient and more legible to write this as 
-%
-\begin{align*}
-	p(\theta | x) &\propto p(x|\theta)p(\theta)
-\end{align*} 
-%
-where the $\propto$ symbol is produced with the command \begin{verbatim}
-	\propto
-\end{verbatim}
-%
-and, furthermore, this is helpful in writing PDFs. For instance, If $X\sim \text{Ga}(\alpha, \beta)$, the the PDF of $X$ may be written in terms of proportionality 
-%
-\begin{align*}
-	p_X(x) &\propto x^{\alpha - 1} \exp \left(-\beta x \right).
-\end{align*}
-% 
-This way, it is easier to derive the kernels of whatever posterior distributions without the cluttering of the proportionality constants, which are really only there to ensure the PDF integrates to 1.
+\section{Tips for the write-up}
 
-\subsection{$\exp$ vs. $e$}
+\subsection{Math notation}
 
-If you are writing a long exponential term, it is better to represent it as $\exp(\bullet)$ rather than $e^\bullet$. For instance, $$\exp \left[ -\frac{1}{2}(y - X\beta)^T \Sigma(y - X\beta) \right]$$ is much easier to read than $$ e^{-\frac{1}{2}(y - X\beta)^T \Sigma(y - X\beta)} .$$ In fact, I rarely ever use $e^\bullet$ just to keep my writing as consistent and legible as possible. Within math environments, the command to produce an upright $\exp$ is very simple: \begin{verbatim}
-	\exp
-\end{verbatim}
+\begin{itemize}
+	\item Use the \texttt{\textbackslash times} command in \LaTeX to make the $\times$ symbol. 
+	\item Use the \texttt{\textbackslash log} command in math environments to produce an upright $\log$ sign (in fact, you can find all such commands listed \href{http://web.ift.uib.no/Teori/KURS/WRK/TeX/symALL.html}{here} under Table 8 [I didn't even know that \texttt{\textbackslash Pr} existed but I'll be using that now]).
+\end{itemize}
 
-\subsection{Using \texttt{\textbackslash left} and \texttt{\textbackslash right}}
+\subsection{Visualization}
 
-On a related note, if you are trying to put parentheses or brackets around a ``tall'' expression, if it is advantageous to use the commands \texttt{\textbackslash left} and \texttt{\textbackslash right}. For instance, \begin{verbatim}
-	\exp \left[ -\frac{1}{2}(y - X\beta)^T \Omega(y - X\beta) \right]
-\end{verbatim}
-%
-produces $$ \exp \left[ -\frac{1}{2}(y - X\beta)^T \Omega(y - X\beta) \right] $$ while \begin{verbatim}
-	\exp [ -\frac{1}{2}(y - X\beta)^T \Omega(y - X\beta) ]
-\end{verbatim}
-%
-produces $$ \exp [ -\frac{1}{2}(y - X\beta)^T \Omega(y - X\beta) ]. $$ You can see that in the latter case, the brackets do not encolse the entire expression in the exponential function. 
-
-\section{Giving context in your writing}
-
-When I was reading through your write-up, I had trouble remembering what question was originally asked in the problem set for any given section. Your typeset equations generally look very good, but do be sure to give some background in each section of your write-up dedicated to explaining what's going on. And also give some rationale for what you are doing, or give sources for where you got your information. For example, in your MLE section you give the MLEs for the mean vector and covariance matrix without any derivation. And you also gave the results of inverting the covariance matrix without deriving that either. Including this information would make your report easier to follow, not only for outside audiences but also for yourself when you want to return to read it later. 
-
-\section{The Bootstrap}
-
-If I remember correctly, you made a presentation on the bootstrap for the MLE of the mean vector and covariance matrix of the multivariate. I thought it was interesting that you showed the \emph{actual} sampling distribution of the MLEs (normal for the mean vector, Wishart for the covariance matrix). However, the entire point of the bootstrap is to \emph{approximate} these sorts of sampling distributions by using Monte Carlo resampling with replacement from the empirical distribution. So what I did for my bootstrap was to just do approximately 10,000 resamples, and each time compute the MLEs and store them to a matrix. From this you can make a histogram of each component. For example, the first figure below shows the sampling distribution of each element of the mean vector, and the second figure shows the sampling distribution of each element in the covariance matrix, with the dashed blue line representing the median of Monte Carlo estimates, and the red solid line representing the true value. 
-
-\pagebreak
-
-I encourage you to read Bradley Efron's original 1979 paper published in \emph{The Annals of Statistics} titled ``Bootstrap Methods: Another Look at the Jackknife'' (available online \href{http://www.stat.cmu.edu/~fienberg/Statistics36-756/Efron1979.pdf}{here}) and I also made a slideshow presentation about this paper which you can find on my \href{https://github.com/spencerwoody/SDS190/blob/master/Spencer_slideshow.pdf}{Github}. Efron defines the concept of the bootstrap so generally that once you learn his notation and approach, it is easy to apply this principle to many difference circumstances. 
-
-\section{\textsf{R} Code}
-
-Your \textsf{R} code was pretty straightforward, and I don't have too much to add to it. However, I noticed a few things you can do to streamline it. It is best to follow some sort of style guide. My personal favorite comes from \href{https://google.github.io/styleguide/Rguide.xml}{Google}, but it's really all about making your code as readable as possible to someone who has never seen your problem before. My biggest pieces of advice in terms of notation would be 1) use \texttt{<-} for assigning variables rather than an equal sign (which should only be used for logical statements and arguments in functions), and 2) use some sort of clever system of comments in your code to separate sections into easily distinguishable chunks.
-
-\subsection{Matrix algebra (multiplying and inverting)}
-
-Matrix math in \textsf{R} can be somewhat clunky, and there are a few tricks that I think everything should learn. \texttt{crossprod} is fast for inner products, \texttt{tcrossprod} is fast for outer products, and \texttt{solve(A, b)} is much more stable than \texttt{solve(A) \%*\% b} for computing $A^{-1}b$. Check out the \href{https://cran.r-project.org/web/packages/Matrix/index.html}{Matrix} package for more on cutting down on computational costs.
+\begin{itemize}
+	\item Be sure to have axis labels for all your graphs, and if you have them side-by-side, it is also a good idea to have them on the same scale (which is admittedly hard to do on the linear scale using this dataset).
+	\item An informative plot for model checking in this plotting the posterior predictive of log-volume, e.g. plotting the posterior predictive median at each log-price as a line and then have a \href{http://ggplot2.tidyverse.org/reference/geom_ribbon.html}{\texttt{geom\_ribbon}} for a 95\% predictive interval.
+	\item We've talked about this at length but if you still want help using \texttt{ggplot2} for facet plots just let me know. $\ddot\smile$
+\end{itemize}
 
 \section{Conclusion}
 
-Overall, great job with this first assignment. I found your write-up mostly easy to follow. I hope this review has been helpful for you, and do not hesitate to ask me to clarify anything or give any other tips. \\
+Overall, great job with this assignment. I hope this review has been helpful for you, and do not hesitate to ask me to clarify anything or give any other tips. \\
 
 Spencer
 

@@ -139,7 +139,7 @@ nburn <- 1000
 b <- matrix(nrow = niter, ncol = I * q)
 beta <- matrix(nrow = niter, ncol = p)
 lambda <- rep(NA, niter)
-D <- array(dim = c(p, p, niter))
+D <- array(dim = c(q, q, niter))
 
 # Prior parameters for D
 nu <- q + 1
@@ -200,6 +200,12 @@ beta <- beta[-(1:nburn), ]
 D <- D[, , -(1:nburn)]
 
 length.post <- length(lambda)
+
+D[1, 1]
+D[, 1]
+D[, ]
+
+
 
 ### --------------------------------------------------------------------------
 ### Traceplots and histograms

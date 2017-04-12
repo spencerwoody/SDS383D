@@ -22,22 +22,32 @@ N <- nrow(polls)
 
 # Design matrix
 X <- cbind(rep(1, N),
-polls$edu == "HS", polls$edu == "SomeColl", polls$edu == "Bacc",
-polls$age == "30to44", polls$age == "45to64", polls$age == "65plus",
+polls$edu %in% c("HS", "SomeColl", "Bacc"), 
+polls$edu %in% c("SomeColl", "Bacc"), 
+polls$edu %in% c("Bacc"),
+polls$age %in% c("30to44", "45to64", "65plus"), 
+polls$age %in% c("45to64", "65plus"), 
+polls$age %in% c("65plus"),
 polls$female,
 polls$black)
+
 
 # Response vector
 y <- polls$bush
 
 # Create new
 
+
+
 ### --------------------------------------------------------------------------
 ### Hierarchical model with lme4 package
 ### --------------------------------------------------------------------------
 
-model1 <- glmer(bush ~ edu + age + female + black + 
-   (1 | state), data = polls, family = binomial)
+model1 <- glmer(bush ~ edu + age + female + black + (1 | state), 
+data = polls, family = binomial)
  
+summary(model1)
+myconf <- confint(model1)
+
 model2 <- glm(bush ~ edu + age + female + black, data = polls, family = binomial)
 

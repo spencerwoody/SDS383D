@@ -512,7 +512,43 @@ The most computationally intensive part of this Gibbs sampler scheme is sampling
 \textbf{A hierarchical probit model via data augmentation}
 \normalsize
 
-
+For this model we model $y_{ij},$  the $j$th binary 0-1 response, $j \in \{ 1, 2, \ldots, n_i \}$, within group $i \in \{ 1, 2, \ldots, I \}$ through the utilization of data augmentation whereby we introduce a latent variable $z_{ij},$
+%
+%
+\begin{align*}
+	(z_{ij} | \beta, \gamma_i) &\sim N(x_{ij}^T\beta + w_{ij}^T \gamma_i, 1) \\
+	y_{ij} &= \mathbf{1}(z_{ij} > 0) = \begin{cases}
+		1 & \text{ if }\; z_{ij} > 0 \\
+		0 & \text{ if }\; z_{ij} \leq 0
+	\end{cases},
+\end{align*}
+%
+%
+where $x_{ij}$ is a vector of covariate features and $w_{ij}$ is a subset of these features whose effects vary at the subject level, captured through $\gamma_i$. We can see that this implies a probit link function so that
+%
+%
+\begin{align*}
+	p_{ij} &= P(y_{ij} = 1) = \Phi(x_{ij}^T\beta + w_{ij}^T \gamma_i), 
+\end{align*}
+%
+%
+where $\Phi(\cdot)$ is the CDF of the standard normal distribution. Let $z_i$ be the $n_i$-length vector of responses from subject $i,$ and similarly, $X_i$ is a $n_i \times p$ design matrix of subject $i$ and $W_i$ is a $n_i \times q$  design matrix with $q \leq p$ whose columns are a a subset of the columns of $X_i$. We then see that 
+%
+%
+\begin{align}
+	(z_i | \beta, \gamma_i) \sim \pN_{n_i} \left( X_i\beta + W_i \gamma_i , \mathcal{I}_{n_i} \right),
+\end{align}
+%
+%
+and furthermore we model the subject-level responses as coming from a multivatiate normal distribution 
+%
+%
+\begin{align*}
+	\gamma_{i} \iid \pN_{q} (0, D),
+\end{align*}
+%
+%
+where $D$ is some $q \times q$ covariance matrix. 
 
 \end{homeworkProblem}
 
