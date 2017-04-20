@@ -82,8 +82,8 @@ n1 <- length(which.1)
 ### --------------------------------------------------------------------------
 
 # Number of iterations and burn-in
-niter <- 1000
-nburn <- 100
+niter <- 6000
+nburn <- 1000
 length.post <- niter - nburn
 
 # Prep prepare to store samples
@@ -153,6 +153,10 @@ for (iter in 2:niter) {
 	D[, , iter] <- D.n
 }
 
+b <- b[-(1:nburn),  ]
+beta <- beta[-(1:nburn), ]
+D <- D[, , -(1:nburn)]
+
 plot(beta[, 1], type = "l")
 
 # Accuracy
@@ -167,7 +171,7 @@ betasummary
 # 95% Credible intervals for b
 b.summary <- t(as.matrix(apply(b, 2, quantile, c(0.025, 0.500, 0.975))))
 
-# Intercept
+# Intercept plot
 int.df <- data.frame(state = factor(states.list),
 lo = b.summary[, 1],
 md = b.summary[, 2],
@@ -187,18 +191,6 @@ geom_point(aes(y = md), col = "firebrick3") +
 theme_bw() + 
 theme(plot.title = element_text(hjust = 0.5),
 text=element_text(family="Courier New", face="bold"))
-
-intCI2 <- ggplot(int.df, aes(ymin = lo, ymax = hi, x = state)) + 
-geom_linerange() + 
-xlab("State") +
-ylab("State-level Intercept") +
-ggtitle("95% Credible intervals for state-level intercept") +
-geom_hline(yintercept = 0, linetype = "dashed") +
-geom_point(aes(y = md), col = "firebrick3") +
-theme_bw() + 
-theme(plot.title = element_text(hjust = 0.5))
-
-
 
 rtnorm <- function(n, a = -Inf, b = Inf, mean = 0, sd = 1) {
 	

@@ -11,7 +11,6 @@
 \usepackage{graphicx} % Required to insert images
 \usepackage{amsmath}% http://ctan.org/pkg/amsmath
 \usepackage{listings} % Required for insertion of code
-\usepackage{bm}
 %\usepackage{couriernew} % Required for the courier font
 
 \usepackage{enumerate} % Required for enumerating with letters
@@ -20,6 +19,8 @@
 \usepackage{avant}
 \usepackage{inconsolata}
 
+\usepackage{bm,upgreek}
+
 \newcommand{\tr}{\text{tr}}
 \newcommand{\pN}{\mathcal{N}}
 \newcommand{\I}{\mathcal{I}}
@@ -27,8 +28,13 @@
 \newcommand{\1}{\mathbf{1}}
 \newcommand{\0}{\mathbf{0}}
 \newcommand{\x}{\mathbf{x}}
+\newcommand{\tee}{\mathbf{t}}
 \newcommand{\f}{\mathbf{f}}
+\newcommand{\K}{\mathbf{K}}
+\newcommand{\g}{\mathbf{g}}
+\newcommand{\h}{\mathbf{h}}
 \newcommand{\y}{\mathbf{y}}
+\newcommand{\YY}{\mathbf{Y}}
 
 
 % \newcommand{\1}{\bm{1}}
@@ -535,9 +541,9 @@ where $x_{ij}$ is a vector of covariate features and $w_{ij}$ is a subset of the
 where $\Phi(\cdot)$ is the CDF of the standard normal distribution. Let $z_i$ be the $n_i$-length vector of responses from subject $i,$ and similarly, $X_i$ is a $n_i \times p$ design matrix of subject $i$ and $W_i$ is a $n_i \times q$  design matrix with $q \leq p$ whose columns are a a subset of the columns of $X_i$. We then see that 
 %
 %
-\begin{align}
+\begin{align*}
 	(z_i | \beta, \gamma_i) \sim \pN_{n_i} \left( X_i\beta + W_i \gamma_i , \mathcal{I}_{n_i} \right),
-\end{align}
+\end{align*}
 %
 %
 and furthermore we model the subject-level responses as coming from a multivatiate normal distribution 
@@ -548,9 +554,335 @@ and furthermore we model the subject-level responses as coming from a multivatia
 \end{align*}
 %
 %
-where $D$ is some $q \times q$ covariance matrix. 
-
+where $D$ is some $q \times q$ covariance matrix. We set the priors for our parameters,
+%
+%
+\begin{align*}
+	\pi(\beta) &\propto 1 \\
+	\pi(D) &\sim \text{IW}\left( \nu, \Psi \right),
+\end{align*}
+%
+%
+and now we can show the full conditionals for the Gibbs sampler. At each iteraton we also need to generate values for the latent variables $z_i$. 
+%
+%
+\begin{align*}
+	\pi(\Sigma | \gamma_i) &\sim \text{IW}\left( \nu + I, \Psi + \sum_{i=1}^I \gamma_i \gamma_i^T \right) 
+\end{align*}
+%
+%
+\begin{align*}
+	\pi\left( \gamma_i | z_i, \beta, D \right) &\propto \pi\left( \gamma_i | D \right) p\left( z_i \right) \\
+	&\sim \pN \left( \left[ W_i^T W_i + D^{-1} \right]^{-1} W_i^T (z_i - X_i\beta), \left[ W_i^T W_i + D^{-1} \right]^{-1} \right)
+\end{align*}
+%
+%
+\begin{align*}
+	\pi(\beta | z, \gamma) &\propto \pi(\beta) \prod_{i=1}^I p\left( z_i | \beta, \gamma_i \right) \\
+	&\propto \prod_{i=1}^I \exp\left[ -\frac{1}{2} (z_i - X_i\beta - W_i \gamma_i)^T (z_i - X_i\beta - W_i \gamma_i) \right] \\
+	&\sim \pN \left( \left[ \sum_{i=1}^I X_i^T X_i \right]^{-1} \sum_{i=1}^I X_i^T (z_i - W_i\gamma_i), \left[ \sum_{i=1}^I X_i^T X_i \right]^{-1} \right)
+\end{align*}
+%
+%
+Finally, the latent variables are generated as follows:
+\begin{enumerate}[(1)]
+	\item
+	\begin{align*}
+			\tilde{z}_i \sim \pN_{n_i}(X_i\beta + W_ib_i, I_{n_i})
+	\end{align*}
+	\item
+	For each $z_{ij},$
+	\begin{align*}
+		z_{ij} | y_{ij} &= \begin{cases}
+			\min\{0, \tilde{z}_{ij}\} & \text{if }\; y_{ij} = 1 \\
+			\max\{0, \tilde{z}_{ij}\} & \text{if }\; y_{ij} = 0
+		\end{cases}
+	\end{align*}
+\end{enumerate}
+%
+%
 \end{homeworkProblem}
+
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 4
+%----------------------------------------------------------------------------------------
+
+\pagebreak
+
+\begin{homeworkProblem}
+
+\large
+\textbf{Gene expression over time}
+\normalsize
+
+For this problem, we have measurements of the gene-expression profiles of 14 genes in the \emph{Drosophila} genome tracked over time during embryogenesis. Figure \ref{fig:allgenes} shows the data, faceted by each gene. There are two levels of hierarchy in the data, as demonstrated. Each gene belongs to a cluster, or ``group'' as it is called in this specific context, and each gene has three biological replicates. Figure \ref{fig:bygroups} demonstrates this two-level hierarchical structure; the left column shows the expression profiles for all the genes in each group, and the right column shows the replicates of each gene for a given group. To accomodate the hierarchical and nonlinear time series nature of the data, we introduce a Bayesian hierarchical non-parametric model. \\
+
+Let $i$ be the subscript for clusters of genes, $n$ in the subscript genes, $r$ is the subscript for replicates. If gene $n$ belongs to cluster $i$ we denote this as $n \in c_i,$ and $N_i = \# \left\{ n \in c_i \right\}.$ Each gene $n$ has $N_n$ replicates, and each replicate $r$ of gene $n$ has $N_{nr}$ measuremeants across time. Note that because every array of genes is measured all at once, so each gene has the same $D = \sum_{r=1}^{N_n} N_{nr}$ total measurements across time for all replicates. \\
+
+We can say, for every replicate $r$ of gene $n$, the data we observe take the form of $\y_{nr}$, a $N_{nr} \times 1$ vector observed at times $\tee_{nr}$. Define the following Gaussian processes,
+%
+%
+\begin{align*}
+	h_i(t) &\sim \text{GP}(\mathbf{0}, k_h(t, t')) \\
+	g_n(t) &\sim \text{GP}(h_i(t), k_g(t, t')) \text{ for } n\in c_i \\
+	f_{nr}(t) &\sim \text{GP}(g_n(t), k_f(t, t'))
+\end{align*} 
+%
+%
+for some covariance functions $k_h(t, t')$, $k_g(t, t')$, and $k_f(t, t')$. Suppose we have $\h_i$, $\g_n$, and $\f_{nr}$ which is draws from $h_i(t)$, $g_n(t)$, and $f_{nr}(t)$, respectively, at times $\tee_{nr}$. Define $\K_f(\tee_{nr}, \tee_{nr'})$ to be the $N_{nr} \times N_{nr'}$ matrix such that its $(i, j)$ element is $k_g(\tee_{nr}[i], \tee_{nr'}[j])$, and define the matrices $\K_g(\tee_{nr}, \tee_{nr'})$ and $\K_h(\tee_{nr}, \tee_{nr'})$ likewise. Then we model the data $\y_{nr}$ as 
+%
+%
+\begin{align*}
+	\y_{nr} &= \f_{nr} + \mathbf{e}, \;\;\mathbf{e} \sim \pN(\mathbf{0}, \sigma^2 \mathcal{I}).
+\end{align*}
+%
+%
+We can see the following conditional distributions,
+%
+%
+\begin{align*}
+	(\y_{nr} | \f_{nr}) &\sim \pN \left( \f_{nr}, \sigma^2 \mathcal{I} \right) \\
+	(\f_{nr} | \g_{n}) &\sim \pN \left( \g_{n}, \K_f(\tee_{nr}, \tee_{nr}) \right) \\
+	(\g_{n} | \h_i) &\sim \pN \left( \h_i, \K_g(\tee_{nr}, \tee_{nr}) \right)\\
+	(\h_i | \tee_{nr}) &\sim \pN \left( \mathbf{0}, \K_h(\tee_{nr}, \tee_{nr}) \right)
+\end{align*}
+%
+%
+It is straightforward to find the marginal likelihood of the data $\y_{nr}$,
+%
+%
+\begin{align*}
+	(\y_{nr} | \tee_{nr}, \bm{\uptheta}) \sim \pN \left( \mathbf{0}, \K_h(\tee_{nr}, \tee_{nr}) + \K_g(\tee_{nr}, \tee_{nr}) + \K_f(\tee_{nr}, \tee_{nr})+ \sigma^2 \mathcal{I} \right )
+\end{align*}
+%
+%
+where $\bm{\uptheta}$ is a vector which includes the parameters to all of the covariance functions. Now we consider the full data vector for all genes in cluster $i$, $\YY_i = \left\{ \y_n \right\}_{n\in c_i}$ where each $\y_n$ is a concatenation of the replicates in gene $n$, $\y_n = \left\{ \y_{nr} \right\}_{r=1}^{N_n}$, $\tee_n = \left\{ \tee_{nr} \right\}_{r=1}^{N_n} =: \tee$ is the same for each $n$ as illustrated above, and has length $D$, $\mathbf{T}_i = \left\{ \tee_k \right\}_{k \in c_i}$. This will have a marginal full likelihood,
+%
+%
+\begin{align*}
+	(\YY_{i} | \mathbf{T}_i, \bm{\uptheta}) &\sim \pN\left( \mathbf{0}, \Sigma_i \right),
+\end{align*}
+%
+%
+where $\Sigma_i$ has a matrix which is $N_i \times N_i$ arrangement of block matrices, each of which is of dimension $D \times D$, 
+%
+%
+\begin{align*}
+	\Sigma_i[n, n'] &= \begin{cases}
+		\K_h(\tee, \tee) + \Sigma_n & \text{if } n = n' \\
+		\K_h(\tee, \tee) & \text{otherwise}
+	\end{cases},
+\end{align*}
+%
+%
+where each $\Sigma_n$ is a covariance matrix representing the with-in gene variance for gene $n$, i.e. the marginal covariance matrix of $\y_n$,
+%
+%
+\begin{align*}
+	\Sigma_n[r, r'] &= \begin{cases}
+		\K_g(\tee_{nr}, \tee_{nr} ) + \K_f(\tee_{nr}, \tee_{nr} ) + \sigma^2 \mathcal{I}& \text{if } r=r' \\
+		\K_g(\tee_{nr}, \tee_{nr'} ) & \text{otherwise}
+	\end{cases}
+\end{align*}
+%
+%
+and also notice that each block $\Sigma_n[r, r']$ is of dimension $N_{nr} \times N_{nr'}$. \\
+
+%
+Now suppose we want to find the conditional distribution of ``new'' draws from the Gaussian grocesses given the data we observe. Specifically we want to find the distribution of $\h_i^\star$ drawn at $\tee^\star_i$, $\g_n^\star$ at $\tee^\star_n$, and $\f_{nr}^\star$ at $\tee^\star_{nr}$, conditional on the data. First, it is easy to find the respective marginal distributions of each of these,
+%
+%
+\begin{align*}
+	(\h_i^\star | \tee_i^\star) &\sim \pN \left( \mathbf{0}, \K_h(\tee_i^\star, \tee_i^\star) \right) \\
+	(\g_n^\star | \tee_n^\star) &\sim \pN \left( \mathbf{0}, \K_h(\tee_n^\star, \tee_n^\star ) + \K_g(\tee_n^\star, \tee_n^\star) \right) \\
+	(\f_{nr}^\star | \tee_{nr}^\star) &\sim \pN \left( \mathbf{0}, \K_h(\tee_{nr}^\star, \tee_{nr}^\star ) + \K_g(\tee_{nr}^\star, \tee_{nr}^\star) + \K_f(\tee_{nr}^\star, \tee_{nr}^\star) \right).
+\end{align*}
+%
+%
+Conditioned on $\y_i$, the distribution of each becomes 
+%
+%
+\begin{align*}
+	\begin{bmatrix}
+		\YY_i \\
+		\h_i^\star
+	\end{bmatrix} &\sim \pN \left( 0, \begin{bmatrix}
+		\Sigma_i & \K_{i\star}^T \\
+		\K_{i\star} & \K_{i \star \star}
+	\end{bmatrix} \right) \\
+	%
+	\begin{bmatrix}
+		\YY_i \\
+		\g_n^\star
+	\end{bmatrix} &\sim \pN \left( 0, \begin{bmatrix}
+		\Sigma_i & \K_{n\star}^T \\
+		\K_{n\star} & \K_{n \star \star}
+	\end{bmatrix} \right) \\
+	%
+	\begin{bmatrix}
+		\YY_i \\
+		\f_{nr}^\star
+	\end{bmatrix} &\sim \pN \left( 0, \begin{bmatrix}
+		\Sigma_i & \K_{nr\star}^T \\
+		\K_{nr\star} & \K_{nr \star \star}
+	\end{bmatrix} \right),
+\end{align*}
+%
+%
+where
+%
+%
+\begin{align*}
+	\K_{i \star \star} &= \K_h(\tee_i^\star, \tee_i^\star)\\
+	\K_{n \star \star} &= \K_h(\tee_n^\star, \tee_n^\star ) + \K_g(\tee_n^\star, \tee_n^\star) \\ 
+	\K_{nr \star \star} &= \K_h(\tee_{nr}^\star, \tee_{nr}^\star ) + \K_g(\tee_{nr}^\star, \tee_{nr}^\star) + \K_f(\tee_{nr}^\star, \tee_{nr}^\star)
+\end{align*}
+%
+%
+and the elements of the off-diagonal matrices are given as
+%
+%
+\begin{align*}
+	\K_{i\star}[t, t'] &= \text{cov}\left( \h_i^\star[t], \YY_i[t'] \right) = k_h(t, t') \\
+	%
+	\K_{n \star}[t, t'] &= \text{cov} \left( \g_n^\star[t], \YY_i[t'] \in \y_{n} \right) = \begin{cases}
+		k_h(t, t') + k_g(t, t') & \text{if } n = n' \\
+		k_h(t, t') & \text{otherwise} 
+	\end{cases} \\
+	%
+	\K_{nr \star}[t, t'] &= \text{cov} \left( \f_{nr}^\star[t], \YY_i[t'] \in \y_{n'r'} \right) = \begin{cases}
+		k_h(t, t') + k_g(t, t') + k_f(t, t') & \text{if } n = n' \text{ and } r=r' \\
+		k_h(t, t') + k_g(t, t') & \text{if } n = n' \text{ and } r\neq r' \\
+		k_h(t, t') & \text{otherwise}. 
+	\end{cases}
+\end{align*}
+%
+With all this in hand, the conditional distributions may be written explicitly, e.g.
+%
+%
+\begin{align*}
+	(\h_i^\star | \YY_i) &\sim \pN \left( \K_{i\star}\Sigma_i^{-1} \YY_i, \K_{i\star\star} - \K_{i\star}\Sigma_{i}^{-1}\K_{i\star}^T \right).
+\end{align*}
+%
+%
+The challenge now is to choose the hyperparameters within $\mathbf{\uptheta}$ by maximizing the marginal likelihood of the full data vector, $\YY_i$. In my \textsf{R} script, I used the \texttt{optim} command to do this, which by default uses the Nelder-Mead method of optimization. For this application, we use the squared-exponential with zero ``nugget'' parameter, e.g., for the cluster-level Gaussian process,
+%
+%
+\begin{align*}
+	k_h(t, t') &= \alpha_h \cdot \exp\left[ -\frac{(t - t')^2}{\gamma_h} \right].
+\end{align*}
+
+Results of the HGP regression are shown below, at the group, gene, and replicate level for all three groups. Not that we have strange results for Group 1. The estimated optimal $\gamma_h$ parameter obtained by \texttt{optim} for Group 1 is very high, around $e^{13}$ This is likely due to a very flat likelihood function, due to the fact that the data all look very similar to each other. The high value of $\gamma_h$ gives a matrix $\K_h(\mathbf{t}, \mathbf{t})$ which has very large numbers in most of its elements, which may have been a source of numerical instability in \textsf{R}.
+
+ % Exploiting the fact that each $\y_n$ has the same $\tee_n = \tee$ and therefore the same $\Sigma_n$, and defining $\K_h = \K_h(\tee, \tee)$ as a shorthand and $\bar{\y}_i = \sum_{k\in c_i} \y_k / N_i$, \href{Hensmen et al. (2013)}{https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-252} showed that the log-marginal likelihood can be expressed as
+%
+%
+% \begin{align*}
+% 	\log p(\YY_i | \mathbf{\uptheta}) =& C + \frac{1}{2} \log \left| \K_h \right| + \frac{N_i}{2}\log \left| \Sigma_n \right| + \frac{1}{2} \log \left| \K_h^{-1} + N_i \Sigma_n \right| - \ldots \\
+% 	& \frac{1}{2} \left[ \sum_{k \in c_i} \y_k^T \Sigma_n^{-1} \y_k - N_i^2 \bar{\y}_i^T \Sigma_n^{-1} \left( \K_h^{-1} + \Sigma_n^{-1} \right)^{-1} \Sigma_n^{-1} \bar{\y}_i \right],
+% \end{align*}
+%
+%
+% where $C$ is a constant. This takes $\mathcal{O}(D^3)$ time to compute instead of $\mathcal{O}(N_i^3 D^3)$ time as would take if we did not use this property. In this case we can use a black-box optimizer such as the Nelder-Mead method in order to find these optimal parameters. \\
+
+% https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-252
+
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=0.8]{Drosophila/img/allgenes.pdf}
+	\caption{Expression profiles for each gene across all replicates}
+	\label{fig:allgenes}
+\end{figure}
+
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=0.5]{Drosophila/img/allgenes1.pdf} 
+		\includegraphics[scale=0.5]{Drosophila/img/facetgroup1.pdf} \\
+		\includegraphics[scale=0.5]{Drosophila/img/allgenes2.pdf} 
+		\includegraphics[scale=0.5]{Drosophila/img/facetgroup2.pdf} \\
+		\includegraphics[scale=0.5]{Drosophila/img/allgenes3.pdf} 	
+		\includegraphics[scale=0.5]{Drosophila/img/facetgroup3.pdf}
+	\caption{Expression profiles of all genes, accounting for clusters (or ``groups'') and replicates}
+	\label{fig:bygroups}
+\end{figure}
+
+%%%%% 
+%%%%% GROUP 1
+%%%%% 
+
+\pagebreak
+
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=0.6]{Drosophila/img/GPgroup1_group.pdf} \\
+		\includegraphics[scale=0.6]{Drosophila/img/GPgroup1_genes.pdf} 
+	\caption{Estimation of group- and gene-level gene expression time series functions for Group 1}
+	\label{fig:GPgroup1}
+\end{figure}
+
+
+\pagebreak
+
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=1]{Drosophila/img/GPgroup1_replicates.pdf}
+	\caption{Estimation of gene, replicate-level gene expression time series functions for genes in Group 1}
+	\label{fig:reps1}
+\end{figure}
+
+
+%%%%% 
+%%%%% GROUP 2
+%%%%% 
+
+\pagebreak
+
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=0.6]{Drosophila/img/GPgroup2_group.pdf} \\
+		\includegraphics[scale=0.6]{Drosophila/img/GPgroup2_genes.pdf} 
+	\caption{Estimation of group- and gene-level gene expression time series functions for Group 2}
+	\label{fig:GPgroup2}
+\end{figure}
+
+\pagebreak
+
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=1]{Drosophila/img/GPgroup2_replicates.pdf}
+	\caption{Estimation of gene, replicate-level gene expression time series functions for genes in Group 2}
+	\label{fig:reps2}
+\end{figure}
+
+\pagebreak
+
+%%%%% 
+%%%%% GROUP 3
+%%%%% 
+
+\pagebreak
+
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=0.6]{Drosophila/img/GPgroup3_group.pdf} \\
+		\includegraphics[scale=0.6]{Drosophila/img/GPgroup3_genes.pdf} 
+	\caption{Estimation of group- and gene-level gene expression time series functions for Group 3}
+	\label{fig:GPgroup3}
+\end{figure}
+
+
+\begin{figure}[htp!]
+	\centering
+		\includegraphics[scale=1]{Drosophila/img/GPgroup3_replicates.pdf}
+	\caption{Estimation of gene, replicate-level gene expression time series functions for genes in Group 3}
+	\label{fig:reps3}
+\end{figure}
+
+%
+%
+\end{homeworkProblem}
+
 
 %%----------------------------------------------------------------------------------------
 %%	LIST CODE
