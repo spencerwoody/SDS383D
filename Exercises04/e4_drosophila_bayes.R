@@ -3,9 +3,7 @@
 ###########################################################
 
 # To-do list:
-#    1. Tidy up the code (document functions and )
-#    2. Function for fitting and plotting
-#    3. Function for looping over all clusters, genes, and replicates
+#    1. Make plots
 
 
 rm(list=ls())
@@ -43,7 +41,7 @@ head(fruitfly)
 ### --------------------------------------------------------------------------
 
 # Choose a group / cluster
-groupnum <- "1"
+groupnum <- "3"
 mygroup <- paste0("group", groupnum)
 
 # Choose all data in this cluster
@@ -89,12 +87,25 @@ myopt
 
 optpar <- myopt$par 
 
+# Give a summary on a non-log scale
+par.summary <- exp(rbind(
+	"gamma.f" = optpar[1], "alpha.f" = optpar[2],
+	"gamma.g" = optpar[3], "alpha.g" = optpar[4],
+	"gamma.h" = optpar[5], "alpha.h" = optpar[6],
+	"sigma2"  = optpar[7]
+)
+)
+par.summary
+
+xtable(par.summary, display = c("s", "e"))
+
 # For group 1... the log-likelihood as a function of the 
 # covariance function parameters is very flat, so alpha.h can shoot up
 if (optpar[6] > 10) {
 	optpar[6] <- 10
 }
 
+# Pre-cache inverse of full covariance matrix, using optimized hyperparameters
 optCOV <- full.covmat(Yi, optpar)
 optCOV.inv <- solve(optCOV)
 
@@ -140,6 +151,30 @@ ylab("log2-Normalized gene expression") +
 theme_bw() +
 theme(plot.title = element_text(hjust = 0.5)) 
 hi.plot
+
+
+# # Repeat hi.df for all genes...
+hi.df.list <- list()
+
+for (kay in 1:Ni) {
+	hi.df.list[[ kay ]] <- hi.df
+	hi.df.list[[ kay ]]$gene <- genes.i[kay]
+}
+
+hi.df.full <- do.call("rbind", hi.df.list)
+#
+# hi.plot.full <- ggplot(hi.df.full, aes(time)) +
+# geom_ribbon(aes(ymin = lo, ymax = hi), fill = "grey70", alpha = 0.8) +
+# geom_line(aes(y = md, col = gene)) +
+# facet_wrap(~gene, ncol = 1) +
+# scale_colour_brewer(palette = "Set1") +
+# ggtitle(paste0("Estimation of Cluster level function for Group ", groupnum)) +
+# xlab("Time") +
+# ylab("log2-Normalized gene expression") +
+# scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+# theme_bw() +
+# theme(plot.title = element_text(hjust = 0.5))
+# hi.plot.full
 
 ### --------------------------------------------------------------------------
 ### Gene- and replicate-level function
@@ -235,13 +270,16 @@ for (k in 1:Ni) {
 gn.df.full <- do.call("rbind", gn.df.list)
 fr.df.full <- do.call("rbind", fr.df.list)
 
+# Gene-level functions
 gn.plot.full <- ggplot(gn.df.full, aes(time)) + 
 geom_ribbon(aes(ymin = lo, ymax = hi), fill = "grey70", alpha = 0.8) +
 geom_line(aes(y = est)) +
-geom_point(data = drosophila[drosophila$group == mygroup, ], aes(time, log2exp, col = replicate)) +
-facet_wrap(~gene) + 
-scale_colour_brewer(palette="Set1") +
+geom_point(data = drosophila[drosophila$group == mygroup, ], aes(time, log2exp, col = gene, shape = replicate)) + 
+geom_line(data = hi.df.full, aes(x = time, y = md), lty = "dotted", col = "grey30") +
+facet_wrap(~gene, nrow = 2) + 
+scale_colour_brewer(palette = "Set1") +
 scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+scale_shape_discrete(solid = F) +# , values = c(3, 4, 8)) +
 ggtitle(paste0("Estimation of Gene level Functions for Group ", groupnum)) +
 xlab("Time") +
 ylab("log2-Normalized gene expression") + 
@@ -249,12 +287,13 @@ theme_bw() +
 theme(plot.title = element_text(hjust = 0.5)) 
 gn.plot.full
 
+# Replicate-level functions
 fr.plot.full <- ggplot(fr.df.full, aes(time)) + 
 geom_ribbon(aes(ymin = lo, ymax = hi), fill = "grey70", alpha = 0.8) +
 geom_line(aes(y = est)) +
 geom_point(data = drosophila[drosophila$group == mygroup, ], aes(time, log2exp, col = gene)) +
 facet_grid(gene ~ replicate) + 
-scale_colour_brewer(palette="Set1") +
+scale_colour_brewer(palette = "Set1") +
 scale_x_continuous(breaks = seq(0, 12, by = 2)) +
 ggtitle(paste0("Estimation of Gene-Replicate level Functions for Group ", groupnum)) +
 xlab("Time") +
@@ -262,6 +301,15 @@ ylab("log2-Normalized gene expression") +
 theme_bw() +
 theme(plot.title = element_text(hjust = 0.5)) 
 fr.plot.full
+
+### Side-by-side plot of group and gene functions
+
+pdf(paste0("Drosophila/img/GPgroup", groupnum, "_combo.pdf"), 
+width = 12.5, height = 5)
+grid.arrange(hi.plot, gn.plot.full, ncol = 2)
+dev.off()
+
+### Save each plot individually
 
 pdf(paste0("Drosophila/img/GPgroup", groupnum, "_group.pdf"), 
 width = 7.5, height = 7)
@@ -323,7 +371,7 @@ pdf("Drosophila/img/facetgroup1.pdf", width = 5.5, height = 5)
 myfacet1
 dev.off()
 
-myfacet2 <- ggplot(drosophila[drosophila$group == mygroup, ], aes(time, log2exp)) +
+myfacet2 <- ggplot(drosophila[drosophila$group == "group2", ], aes(time, log2exp)) +
 geom_point(aes(col = replicate)) +
 facet_wrap(~gene) +
 ggtitle("Expression Profiles for Genes in Group 2") +
@@ -388,7 +436,7 @@ pdf("Drosophila/img/allgenes1.pdf", width = 5.5, height = 5)
 allgenes1
 dev.off()
 
-allgenes2 <- ggplot(drosophila[drosophila$group == mygroup, ], aes(time, log2exp)) +
+allgenes2 <- ggplot(drosophila[drosophila$group == "group2", ], aes(time, log2exp)) +
 geom_point(aes(col = gene)) +
 ggtitle("Expression Profiles for all Genes in Group 2") +
 xlab("Time") +

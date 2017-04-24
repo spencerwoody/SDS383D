@@ -91,24 +91,22 @@ full.covmat <- function(Yi, params) {
 	#      3) replicate
 	# 	   4) time
 	#      5) log2exp
-	# params - a vector of seven parameters
-	#      1) gamma.f - 
-	#      2) alpha.f - 
-	#      3) gamma.g - 
-	#      4) alpha.g - 
-	#      5) gamma.h - 
-	#      6) alpha.h - 
-	#      7) sigma2  - 
+	# params - a vector of seven parameters ON A LOG SCALE (for optim)
+	#      1) gamma.f - relative length, cluster-level
+	#      2) alpha.f - amplitude, cluster-level
+	#      3) gamma.g - relative length, gene-level
+	#      4) alpha.g - amplitude, gene-level
+	#      5) gamma.h - relative length, gene/replicate-level
+	#      6) alpha.h - amplitude, gene/replicate-level
+	#      7) sigma2  - variance of noise
 	#
 	# ----------------------------------------------------------------------
 	# OUTPUT: 
   	# negative log-likelihood 
 	# ----------------------------------------------------------------------
 	
-	require(mvtnorm)
-	
 	# ----------------------------------------------------------------------
-	# Renames the parameters
+	# Rename the parameters
 	# ----------------------------------------------------------------------
 	
 	gamma.f <- exp(params[1])
@@ -130,7 +128,7 @@ full.covmat <- function(Yi, params) {
 	numreps <- length(reps)
 	
 	# ----------------------------------------------------------------------
-	# Make Kf block matrices
+	# Make Kf block matrices (within replicate variance)
 	# ----------------------------------------------------------------------
 	
 	tnr.list <- list()
@@ -180,6 +178,9 @@ neg.ll <- function(Yi, params) {
 	# ----------------------------------------------------------------------
 	#  Compute the full covariance 
 	# ----------------------------------------------------------------------
+	
+	require(mvtnorm)
+	
 	COVMAT <- full.covmat(Yi, params)
 	
 	neg.ll <- - dmvnorm(Yi$log2exp, mean = rep(0, nrow(Yi)),

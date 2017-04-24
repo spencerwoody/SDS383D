@@ -630,7 +630,7 @@ We can say, for every replicate $r$ of gene $n$, the data we observe take the fo
 \end{align*} 
 %
 %
-for some covariance functions $k_h(t, t')$, $k_g(t, t')$, and $k_f(t, t')$. Suppose we have $\h_i$, $\g_n$, and $\f_{nr}$ which is draws from $h_i(t)$, $g_n(t)$, and $f_{nr}(t)$, respectively, at times $\tee_{nr}$. Define $\K_f(\tee_{nr}, \tee_{nr'})$ to be the $N_{nr} \times N_{nr'}$ matrix such that its $(i, j)$ element is $k_g(\tee_{nr}[i], \tee_{nr'}[j])$, and define the matrices $\K_g(\tee_{nr}, \tee_{nr'})$ and $\K_h(\tee_{nr}, \tee_{nr'})$ likewise. Then we model the data $\y_{nr}$ as 
+for some covariance functions $k_h(t, t')$, $k_g(t, t')$, and $k_f(t, t')$. Suppose we have $\h_i$, $\g_n$, and $\f_{nr}$ which is draws from $h_i(t)$, $g_n(t)$, and $f_{nr}(t)$, respectively, at times $\tee_{nr}$. Define $\K_f(\tee_{nr}, \tee_{nr'})$ to be the $N_{nr} \times N_{nr'}$ matrix such that its $(i, j)$ element is $k_g(\tee_{nr}[\,i\,], \tee_{nr'}[\,j\,])$, and define the matrices $\K_g(\tee_{nr}, \tee_{nr'})$ and $\K_h(\tee_{nr}, \tee_{nr'})$ likewise. Then we model the data $\y_{nr}$ as 
 %
 %
 \begin{align*}
@@ -642,22 +642,22 @@ We can see the following conditional distributions,
 %
 %
 \begin{align*}
-	(\y_{nr} | \f_{nr}) &\sim \pN \left( \f_{nr}, \sigma^2 \mathcal{I} \right) \\
-	(\f_{nr} | \g_{n}) &\sim \pN \left( \g_{n}, \K_f(\tee_{nr}, \tee_{nr}) \right) \\
-	(\g_{n} | \h_i) &\sim \pN \left( \h_i, \K_g(\tee_{nr}, \tee_{nr}) \right)\\
-	(\h_i | \tee_{nr}) &\sim \pN \left( \mathbf{0}, \K_h(\tee_{nr}, \tee_{nr}) \right)
+	(\y_{nr} | \f_{nr}, \sigma^2) &\sim \pN \left( \f_{nr}, \sigma^2 \mathcal{I} \right) \\
+	(\f_{nr} | \g_{n}, \bm{\uptheta}_f) &\sim \pN \left( \g_{n}, \K_f(\tee_{nr}, \tee_{nr}) \right) \\
+	(\g_{n} | \h_i,\bm{\uptheta}_g) &\sim \pN \left( \h_i, \K_g(\tee_{nr}, \tee_{nr}) \right)\\
+	(\h_i | \tee_{nr}, \bm{\uptheta}_h) &\sim \pN \left( \mathbf{0}, \K_h(\tee_{nr}, \tee_{nr}) \right),
 \end{align*}
 %
 %
-It is straightforward to find the marginal likelihood of the data $\y_{nr}$,
+where $\bm{\uptheta}_f$, $\bm{\uptheta}_g$, and $\bm{\uptheta}_h$ are vectors containing the respective parameters for the covariance functions $k_f$, $k_g$, and $k_h$. Let $\bm{\uptheta} = (\bm{\uptheta}_f, \bm{\uptheta}_g, \bm{\uptheta}_h, \sigma^2)^T.$ It is straightforward to find the marginal likelihood of the data $\y_{nr}$,
 %
 %
 \begin{align*}
-	(\y_{nr} | \tee_{nr}, \bm{\uptheta}) \sim \pN \left( \mathbf{0}, \K_h(\tee_{nr}, \tee_{nr}) + \K_g(\tee_{nr}, \tee_{nr}) + \K_f(\tee_{nr}, \tee_{nr})+ \sigma^2 \mathcal{I} \right )
+	(\y_{nr} | \tee_{nr}, \bm{\uptheta}) \sim \pN \left( \mathbf{0}, \K_h(\tee_{nr}, \tee_{nr}) + \K_g(\tee_{nr}, \tee_{nr}) + \K_f(\tee_{nr}, \tee_{nr})+ \sigma^2 \mathcal{I} \right ).
 \end{align*}
 %
 %
-where $\bm{\uptheta}$ is a vector which includes the parameters to all of the covariance functions. Now we consider the full data vector for all genes in cluster $i$, $\YY_i = \left\{ \y_n \right\}_{n\in c_i}$ where each $\y_n$ is a concatenation of the replicates in gene $n$, $\y_n = \left\{ \y_{nr} \right\}_{r=1}^{N_n}$, $\tee_n = \left\{ \tee_{nr} \right\}_{r=1}^{N_n} =: \tee$ is the same for each $n$ as illustrated above, and has length $D$, $\mathbf{T}_i = \left\{ \tee_k \right\}_{k \in c_i}$. This will have a marginal full likelihood,
+Now we consider the full data vector for all genes in cluster $i$, $\YY_i = \left\{ \y_n \right\}_{n\in c_i}$ where each $\y_n$ is a concatenation of the replicates in gene $n$, $\y_n = \left\{ \y_{nr} \right\}_{r=1}^{N_n}$. We can also write $\YY_i = \left\{ \left\{ \y_{nr} \right\}_{r=1}^{N_n} \right\}_{n\in c_i}.$ Note that $\tee_n = \left\{ \tee_{nr} \right\}_{r=1}^{N_n} =: \tee$ is the same for each $n$ as explained above, and has length $D$. Finally, define $\mathbf{T}_i = \left\{ \tee_n \right\}_{n \in c_i}$. This will have a marginal full likelihood,
 %
 %
 \begin{align*}
@@ -669,7 +669,7 @@ where $\Sigma_i$ has a matrix which is $N_i \times N_i$ arrangement of block mat
 %
 %
 \begin{align*}
-	\Sigma_i[n, n'] &= \begin{cases}
+	\Sigma_i[n, n'] &= \text{cov}(\y_{n}, \y_{n'}) = \begin{cases}
 		\K_h(\tee, \tee) + \Sigma_n & \text{if } n = n' \\
 		\K_h(\tee, \tee) & \text{otherwise}
 	\end{cases},
@@ -680,7 +680,7 @@ where each $\Sigma_n$ is a covariance matrix representing the with-in gene varia
 %
 %
 \begin{align*}
-	\Sigma_n[r, r'] &= \begin{cases}
+	\Sigma_n[r, r'] &= \text{cov}(\y_{nr}, \y_{nr'}) = \begin{cases}
 		\K_g(\tee_{nr}, \tee_{nr} ) + \K_f(\tee_{nr}, \tee_{nr} ) + \sigma^2 \mathcal{I}& \text{if } r=r' \\
 		\K_g(\tee_{nr}, \tee_{nr'} ) & \text{otherwise}
 	\end{cases}
@@ -766,14 +766,57 @@ With all this in hand, the conditional distributions may be written explicitly, 
 \end{align*}
 %
 %
-The challenge now is to choose the hyperparameters within $\mathbf{\uptheta}$ by maximizing the marginal likelihood of the full data vector, $\YY_i$. In my \textsf{R} script, I used the \texttt{optim} command to do this, which by default uses the Nelder-Mead method of optimization. For this application, we use the squared-exponential with zero ``nugget'' parameter, e.g., for the cluster-level Gaussian process,
+\pagebreak
+
+Now the concern is choice of hyperparameters, $\bm{\uptheta}$. We have two options here.
+%
+%
+\begin{enumerate}[(1)]
+	\item \textbf{Fully Bayesian:} Place a hyperprior on $\bm{\uptheta}$ (perhaps a joint independent half-Cauchy priors for each component) and then find the posterior using Bayes' Rule.
+	\item \textbf{Marginal Likelihood Maximization:} Maximize $\log p(\YY_i | \bm{\uptheta}, \mathbf{T}_i)$ w.r.t. $\bm{\uptheta}$.
+\end{enumerate}
+%
+%
+For the sake of simplicity in implementation, I chose the latter approach. The downside is that the likelihood is not convex, so we are not guaranteed to find a global minimum. One approach to this problem is using gradient based methods, using the partial derivatives,
 %
 %
 \begin{align*}
-	k_h(t, t') &= \alpha_h \cdot \exp\left[ -\frac{(t - t')^2}{\gamma_h} \right].
+	\frac{\partial}{\partial \theta_j} \log p(\YY_i | \bm{\uptheta}, \mathbf{T}_i)  &= \frac{\partial}{\partial \theta_j} \left[ -\frac{1}{2}\YY_i^T \Sigma_i^{-1} \YY_i - \frac{1}{2} \log \left| \Sigma_i \right | - \frac{N_iD}{2} \log 2\pi \right] \\
+	&= -\frac{1}{2} \YY_i \Sigma_i^{-1} \frac{\partial \Sigma_i}{\partial \theta_j} \Sigma_i^{-1} \YY_i - \frac{1}{2} \text{tr} \left( \Sigma_i^{-1} \frac{\partial \Sigma_i}{\partial \theta_j} \right) \\
+	&= -\frac{1}{2} \text{tr} \left( \left[\bm{\upeta} \bm{\upeta}^T - \Sigma_i^{-1} \right]\frac{\partial \Sigma_i}{\partial \theta_j} \right), \text{ where } \bm{\upeta} = \Sigma_i^{-1} \YY_i
 \end{align*}
+%
+%
+for each component $\theta_j$ in $\bm{\uptheta}$ (notice that $\frac{\partial \Sigma_i}{\partial \theta_j}$ is a matrix derivative). In my \textsf{R} script, however, I used the \texttt{optim} command to do this, which by default uses the Nelder-Mead method of optimization. For this application, we use the squared-exponential covariance function with zero ``nugget'' parameter, i.e.,
+%
+%
+\begin{align*}
+	k_h(t, t') &= \alpha_h \cdot \exp\left[ -\left( \frac{t - t'}{\gamma_h} \right)^2 \right] \\
+	k_g(t, t') &= \alpha_g \cdot \exp\left[ -\left( \frac{t - t'}{\gamma_g} \right)^2 \right] \\
+	k_f(t, t') &= \alpha_f \cdot \exp\left[ -\left( \frac{t - t'}{\gamma_f} \right)^2 \right],
+\end{align*}
+%
+%
+where each $\alpha_{\bullet}$ is called the \emph{amplitude} parameter, and each $\gamma_{\bullet}$ is called the \emph{relative length} parameter. \\
 
 Results of the HGP regression are shown below, at the group, gene, and replicate level for all three groups. The estimated time series functions are shown, along with a 95\% confidence band. Not that we have strange results for Group 1. The estimated optimal $\gamma_h$ parameter obtained by \texttt{optim} for Group 1 is very high, around $e^{13}$ This is likely due to a very flat likelihood function, due to the fact that the data all look very similar to each other. The high value of $\gamma_h$ gives a matrix $\K_h(\mathbf{t}, \mathbf{t})$ which has very large numbers in most of its elements, which may have been a source of numerical instability in \textsf{R}.
+
+\begin{table}[htp!]
+	\centering
+\begin{tabular}{l|r|r|r}
+Parameter & MLE (group 1) & MLE (group 2) & MLE (group 3) \\ \hline
+ $\gamma_f$  & $1.96 \times 10^{+2}$ & $1.53 \times 10^{-2}$ & $2.26 \times 10^{-1}$ \\ 
+  $\alpha_f$ & $1.44 \times 10^{-4}$ & $2.24 \times 10^{-2}$ & $1.01 \times 10^{-2}$ \\ 
+  $\gamma_g$ & $3.48 \times 10^{+0}$ & $2.10 \times 10^{+0}$ & $1.38 \times 10^{+0}$ \\ 
+  $\alpha_g$ & $3.68 \times 10^{-2}$ & $1.26 \times 10^{+0}$ & $1.42 \times 10^{+0}$ \\ 
+  $\gamma_h$ & $7.85 \times 10^{+1}$ & $2.96 \times 10^{+1}$ & $1.13 \times 10^{+1}$ \\ 
+  $\alpha_h$ & $2.20 \times 10^{+4}$ & $1.48 \times 10^{+2}$ & $1.41 \times 10^{+2}$ \\ 
+  $\sigma^2$ & $1.99 \times 10^{-3}$ & $1.91 \times 10^{-1}$ & $3.72 \times 10^{-2}$ \\ 
+\end{tabular}
+	\caption{Results of Nelder-Mead method for finding MLEs of hyperparameters}
+\end{table}
+
+
 
  % Exploiting the fact that each $\y_n$ has the same $\tee_n = \tee$ and therefore the same $\Sigma_n$, and defining $\K_h = \K_h(\tee, \tee)$ as a shorthand and $\bar{\y}_i = \sum_{k\in c_i} \y_k / N_i$, \href{Hensmen et al. (2013)}{https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-252} showed that the log-marginal likelihood can be expressed as
 %
@@ -787,6 +830,8 @@ Results of the HGP regression are shown below, at the group, gene, and replicate
 % where $C$ is a constant. This takes $\mathcal{O}(D^3)$ time to compute instead of $\mathcal{O}(N_i^3 D^3)$ time as would take if we did not use this property. In this case we can use a black-box optimizer such as the Nelder-Mead method in order to find these optimal parameters. \\
 
 % https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-252
+
+\pagebreak
 
 \begin{figure}[htp!]
 	\centering
