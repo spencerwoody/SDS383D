@@ -1,0 +1,48 @@
+\begin{thebibliography}{1}
+
+\bibitem{DESeq2}
+Michael~I Love, Wolfgang Huber, and Simon Anders.
+\newblock Moderated estimation of fold change and dispersion for {RNA}-seq data
+  with {DESeq2}.
+\newblock {\em Genome Biology}, 15:550, 2014.
+
+\bibitem{edgeR}
+Mark~D Robinson, Davis~J McCarthy, and Gordon~K Smyth.
+\newblock edger: a bioconductor package for differential expression analysis of
+  digital gene expression data.
+\newblock {\em Bioinformatics}, 26(1):139--140, January 2010.
+
+\bibitem{GPmicroarray}
+James Hensman, Neil~D. Lawrence, and Magnus Rattray.
+\newblock Hierarchical bayesian modelling of gene expression time series across
+  irregularly sampled replicates and clusters.
+\newblock {\em BMC Bioinformatics}, 14(1):252, 2013.
+
+\bibitem{PG}
+N.~G. {Polson}, J.~G. {Scott}, and J.~{Windle}.
+\newblock {Bayesian inference for logistic models using Polya-Gamma latent
+  variables}.
+\newblock {\em ArXiv e-prints}, May 2012.
+
+\bibitem{NBregression}
+M.~{Zhou}, L.~{Li}, D.~{Dunson}, and L.~{Carin}.
+\newblock {Lognormal and Gamma Mixed Negative Binomial Regression}.
+\newblock {\em ArXiv e-prints}, June 2012.
+
+\bibitem{Houser}
+John~R. Houser, Craig Barnhart, Daniel~R. Boutz, Sean~M. Carroll, Aurko
+  Dasgupta, Joshua~K. Michener, Brittany~D. Needham, Ophelia Papoulas,
+  Viswanadham Sridhara, Dariya~K. Sydykova, Christopher~J. Marx, M.~Stephen
+  Trent, Jeffrey~E. Barrick, Edward~M. Marcotte, and Claus~O. Wilke.
+\newblock Controlled measurement and comparative analysis of cellular
+  components in e. coli reveals broad regulatory changes in response to glucose
+  starvation.
+\newblock {\em PLOS Computational Biology}, 11(8):1--27, 08 2015.
+
+\bibitem{GPDE}
+Alfredo~A. Kalaitzis and Neil~D. Lawrence.
+\newblock A simple approach to ranking differentially expressed gene expression
+  time courses through {Gaussian} process regression.
+\newblock {\em BMC Bioinformatics}, 12(1):180, 2011.
+
+\end{thebibliography}
