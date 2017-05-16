@@ -2,10 +2,6 @@
 ######### Created by Spencer Woody on 27 Mar 2017 #########
 ###########################################################
 
-# To-do list:
-#    1. Make plots
-
-
 rm(list=ls())
 
 library(ggplot2)
@@ -22,6 +18,7 @@ source("e4_covmat_funs.R")
 ### --------------------------------------------------------------------------
 
 drosophila <- read.csv("Drosophila/droslong.csv", header = T)
+head(drosophila)
 
 # Simpler dataframe
 fruitfly <- data.frame(
@@ -33,15 +30,117 @@ fruitfly <- data.frame(
 	
 # Order the dataframe
 fruitfly <- fruitfly[with(fruitfly, order(group, gene, replicate, time)), ]
-
 head(fruitfly)
+
+### --------------------------------------------------------------------------
+### Plot
+### --------------------------------------------------------------------------
+
+
+allgenes <- ggplot(drosophila, aes(time, log2exp)) +
+geom_point(aes(col = replicate)) +
+# scale_colour_manual("Replicate", values = c(col1, col2, col3)) +
+facet_wrap(~gene) +
+ggtitle("Expression Profiles for all Genes") +
+xlab("Time") +
+ylab("log2-Normalized gene expression") + 
+scale_colour_brewer(palette="Set1") +
+scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+theme_bw() +
+theme(plot.title = element_text(hjust = 0.5))
+allgenes
+
+# Facet plots for each group
+
+myfacet1 <- ggplot(drosophila[drosophila$group == "group1", ], aes(time, log2exp)) +
+geom_point(aes(col = replicate)) +
+# scale_colour_manual("Replicate", values = c(col1, col2, col3)) +
+facet_wrap(~gene) +
+ggtitle("Expression Profiles for Genes in Group 1") +
+xlab("Time") +
+ylab("log2-Normalized gene expression") + 
+scale_colour_brewer(palette="Set1") +
+scale_y_continuous(limits = c(min(drosophila$log2exp), max(drosophila$log2exp)))+
+scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+theme_bw() +
+theme(plot.title = element_text(hjust = 0.5))
+myfacet1
+
+myfacet2 <- ggplot(drosophila[drosophila$group == "group2", ], aes(time, log2exp)) +
+geom_point(aes(col = replicate)) +
+facet_wrap(~gene) +
+ggtitle("Expression Profiles for Genes in Group 2") +
+xlab("Time") +
+ylab("log2-Normalized gene expression") + 
+scale_y_continuous(limits = c(min(drosophila$log2exp), max(drosophila$log2exp)))+
+scale_colour_brewer(palette="Set1") +
+scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+theme_bw() +
+theme(plot.title = element_text(hjust = 0.5))
+myfacet2
+
+myfacet3 <- ggplot(drosophila[drosophila$group == "group3", ], aes(time, log2exp)) +
+geom_point(aes(col = replicate)) +
+facet_wrap(~gene) +
+ggtitle("Expression Profiles for Genes in Group 3") +
+xlab("Time") +
+ylab("log2-Normalized gene expression") + 
+scale_y_continuous(limits = c(min(drosophila$log2exp), max(drosophila$log2exp)))+
+scale_colour_brewer(palette="Set1") +
+scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+theme_bw() +
+theme(plot.title = element_text(hjust = 0.5))
+myfacet3
+
+grid.arrange(myfacet1, myfacet2, myfacet3, ncol = 3)
+myfacet1 <- ggplot(drosophila[drosophila$group == "group1", ], aes(time, log2exp)) +
+geom_point(aes(col = replicate)) +
+# scale_colour_manual("Replicate", values = c(col1, col2, col3)) +
+facet_wrap(~gene) +
+ggtitle("Expression Profiles for Genes in Group 1") +
+xlab("Time") +
+ylab("log2-Normalized gene expression") + 
+scale_colour_brewer(palette="Set1") +
+scale_y_continuous(limits = c(min(drosophila$log2exp), max(drosophila$log2exp)))+
+scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+theme_bw() +
+theme(plot.title = element_text(hjust = 0.5))
+myfacet1
+
+myfacet2 <- ggplot(drosophila[drosophila$group == "group2", ], aes(time, log2exp)) +
+geom_point(aes(col = replicate)) +
+facet_wrap(~gene) +
+ggtitle("Expression Profiles for Genes in Group 2") +
+xlab("Time") +
+ylab("log2-Normalized gene expression") + 
+scale_y_continuous(limits = c(min(drosophila$log2exp), max(drosophila$log2exp)))+
+scale_colour_brewer(palette="Set1") +
+scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+theme_bw() +
+theme(plot.title = element_text(hjust = 0.5))
+myfacet2
+
+myfacet3 <- ggplot(drosophila[drosophila$group == "group3", ], aes(time, log2exp)) +
+geom_point(aes(col = replicate)) +
+facet_wrap(~gene) +
+ggtitle("Expression Profiles for Genes in Group 3") +
+xlab("Time") +
+ylab("log2-Normalized gene expression") + 
+scale_y_continuous(limits = c(min(drosophila$log2exp), max(drosophila$log2exp)))+
+scale_colour_brewer(palette="Set1") +
+scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+theme_bw() +
+theme(plot.title = element_text(hjust = 0.5))
+myfacet3
+
+
 
 ### --------------------------------------------------------------------------
 ### Optimize parameters
 ### --------------------------------------------------------------------------
 
 # Choose a group / cluster
-groupnum <- "3"
+groupnum <- "2"
 mygroup <- paste0("group", groupnum)
 
 # Choose all data in this cluster
@@ -63,6 +162,37 @@ sigma2 <- -2
 
 init.par <- c(gamma.f, alpha.f, gamma.g, alpha.g, gamma.h, alpha.h, sigma2)
 
+# Find optimal parameters by maximizing the log-likelihood
+myopt <- optim(par = init.par, fn = neg.ll, Yi = Yi)
+myopt
+
+optpar <- myopt$par 
+
+# Give a summary on a non-log scale
+par.summary <- exp(rbind(
+	"gamma.f" = optpar[1], "alpha.f" = optpar[2],
+	"gamma.g" = optpar[3], "alpha.g" = optpar[4],
+	"gamma.h" = optpar[5], "alpha.h" = optpar[6],
+	"sigma2"  = optpar[7]
+)
+)
+par.summary
+
+# For group 1... the log-likelihood as a function of the 
+# covariance function parameters is very flat, so alpha.h can shoot up
+if (optpar[6] > 10) {
+	optpar[6] <- 10
+}
+
+# Pre-cache inverse of full covariance matrix, using optimized hyperparameters
+optCOV <- full.covmat(Yi, optpar)
+optCOV.inv <- solve(optCOV)
+
+# Sequence of times to smooth over
+t.star <- seq(0.5, 12.5, length.out = 200)
+
+
+
 # Choose one gene in cluster dataframe to make
 # vector of times for samples, and number of samples for each replicate
 yn <- Yi[Yi$gene == Yi$gene[1], ] #
@@ -81,36 +211,6 @@ for (k in 1:numreps) {
 tn <- unlist(tnr.list) # Concatenated times over all replicates
 D <- length(tn) # Number of measurements across all replicates
 
-# Find optimal parameters by maximizing the log-likelihood
-myopt <- optim(par = init.par, fn = neg.ll, Yi = Yi)
-myopt
-
-optpar <- myopt$par 
-
-# Give a summary on a non-log scale
-par.summary <- exp(rbind(
-	"gamma.f" = optpar[1], "alpha.f" = optpar[2],
-	"gamma.g" = optpar[3], "alpha.g" = optpar[4],
-	"gamma.h" = optpar[5], "alpha.h" = optpar[6],
-	"sigma2"  = optpar[7]
-)
-)
-par.summary
-
-xtable(par.summary, display = c("s", "e"))
-
-# For group 1... the log-likelihood as a function of the 
-# covariance function parameters is very flat, so alpha.h can shoot up
-if (optpar[6] > 10) {
-	optpar[6] <- 10
-}
-
-# Pre-cache inverse of full covariance matrix, using optimized hyperparameters
-optCOV <- full.covmat(Yi, optpar)
-optCOV.inv <- solve(optCOV)
-
-# Sequence of times to smooth over
-t.star <- seq(0.5, 12.5, length.out = 200)
 
 ### --------------------------------------------------------------------------
 ### Cluster-level function (denoted by i)
@@ -162,7 +262,7 @@ for (kay in 1:Ni) {
 }
 
 hi.df.full <- do.call("rbind", hi.df.list)
-#
+
 # hi.plot.full <- ggplot(hi.df.full, aes(time)) +
 # geom_ribbon(aes(ymin = lo, ymax = hi), fill = "grey70", alpha = 0.8) +
 # geom_line(aes(y = md, col = gene)) +
@@ -308,6 +408,50 @@ pdf(paste0("Drosophila/img/GPgroup", groupnum, "_combo.pdf"),
 width = 12.5, height = 5)
 grid.arrange(hi.plot, gn.plot.full, ncol = 2)
 dev.off()
+
+
+### Add 
+
+hi.plot2 <- ggplot(hi.df, aes(time)) + 
+geom_ribbon(aes(ymin = lo, ymax = hi), fill = "grey70", alpha = 0.7) +
+geom_line(aes(y = md)) +
+geom_point(data = drosophila[drosophila$group == mygroup, ], aes(time, log2exp, col = gene)) +
+scale_colour_brewer(palette="Set1") +
+geom_line(data = gn.df.full, aes(x = time, y = est, col = gene), lty = "dashed", alpha = 0.5, size = 0.75) +
+scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+ggtitle(paste0("Estimation of Group level Function for Group ", groupnum)) +
+xlab("Time") +
+ylab("log2-Normalized gene expression") + 
+theme_bw() +
+theme(plot.title = element_text(hjust = 0.5)) 
+hi.plot2
+
+pdf(paste0("Drosophila/img/GPgroup", groupnum, "_combo2.pdf"), 
+width = 12.5, height = 5)
+grid.arrange(hi.plot2, gn.plot.full, ncol = 2)
+dev.off()
+
+
+
+
+#
+#
+# hi.plot3 <- ggplot(hi.df, aes(time)) +
+# geom_ribbon(aes(ymin = lo, ymax = hi), fill = "grey70", alpha = 0.7) +
+# geom_line(aes(y = md)) +
+# scale_colour_brewer(palette="Set1") +
+# geom_line(data = gn.df.full, aes(x = time, y = est, col = gene), lty = "dashed", alpha = 1, size = 0.75) +
+# scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+# ggtitle(paste0("Estimation of Group level Function for Group ", groupnum)) +
+# xlab("Time") +
+# ylab("log2-Normalized gene expression") +
+# theme_bw() +
+# theme(plot.title = element_text(hjust = 0.5))
+# hi.plot3
+#
+
+
+
 
 ### Save each plot individually
 

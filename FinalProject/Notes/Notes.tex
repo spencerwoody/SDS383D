@@ -1,0 +1,505 @@
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage{lastpage} % Required to determine the last page for the footer
+\usepackage{extramarks} % Required for headers and footers
+\usepackage[usenames,dvipsnames]{color} % Required for custom colors
+\usepackage{graphicx} % Required to insert images
+\usepackage{amsmath}% http://ctan.org/pkg/amsmath
+\usepackage{listings} % Required for insertion of code
+%\usepackage{couriernew} % Required for the courier font
+
+\usepackage{amsthm}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+
+\newtheorem{lemma}[theorem]{Lemma}
+
+\usepackage{enumerate} % Required for enumerating with letters
+
+\usepackage{mathpazo}
+\usepackage{avant}
+\usepackage{inconsolata}
+
+\usepackage{bm,upgreek}
+
+\newcommand{\tr}{\text{tr}}
+\newcommand{\pN}{\mathcal{N}}
+\newcommand{\I}{\mathcal{I}}
+\newcommand{\R}{\textsf{R} }
+\newcommand{\1}{\mathbf{1}}
+\newcommand{\0}{\mathbf{0}}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\tee}{\mathbf{t}}
+\newcommand{\f}{\mathbf{f}}
+\newcommand{\K}{\mathbf{K}}
+\newcommand{\g}{\mathbf{g}}
+\newcommand{\h}{\mathbf{h}}
+\newcommand{\y}{\mathbf{y}}
+\newcommand{\YY}{\mathbf{Y}}
+
+
+% \newcommand{\1}{\bm{1}}
+% \newcommand{\0}{\bm{0}}
+% \newcommand{\x}{\bm{x}}
+% \newcommand{\f}{\bm{f}}
+% \newcommand{\y}{\bm{y}}
+
+\newcommand{\iid}{\overset{\text{iid}}{\sim}}
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+
+
+
+
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1} % Line spacing
+
+% Set up the header and footer
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName} % Top left header
+\chead{\hmwkClass\ : \hmwkTitle} % Top center head
+\rhead{} % Top right header
+\lfoot{\lastxmark} % Bottom left footer
+\cfoot{} % Bottom center footer
+\rfoot{Page\ \thepage\ of\ \protect\pageref{LastPage}} % Bottom right footer
+\renewcommand\headrulewidth{0.4pt} % Size of the header rule
+\renewcommand\footrulewidth{0.4pt} % Size of the footer rule
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+%----------------------------------------------------------------------------------------
+%	CODE INCLUSION CONFIGURATION
+%----------------------------------------------------------------------------------------
+
+\definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0} % This is the color used for comments
+\lstloadlanguages{R} % Load R syntax for listings, for a list of other languages supported see: ftp://ftp.tex.ac.uk/tex-archive/macros/latex/contrib/listings/listings.pdf
+\lstset{language=R, % Use R in this example
+        frame=single, % Single frame around code
+        basicstyle=\small\ttfamily, % Use small true type font
+        keywordstyle=[1]\color{Blue}, % Perl functions bold and blue
+        keywordstyle=[2]\color{Purple}, % Perl function arguments purple
+        keywordstyle=[3]\color{Blue}\underbar, % Custom functions underlined and blue
+        identifierstyle=, % Nothing special about identifiers                                         
+        commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small, % Comments small dark green courier font
+        stringstyle=\color{Purple}, % Strings are purple
+        showstringspaces=false, % Don't put marks in string spaces
+        tabsize=4, % 5 spaces per tab
+        %
+        % Put standard Perl functions not included in the default language here
+        morekeywords={rand},
+        %
+        % Put Perl function parameters here
+        morekeywords=[2]{on, off, interp},
+        %
+        % Put user defined functions here
+        morekeywords=[3]{test},
+       	%
+        morecomment=[l][\color{Blue}]{...}, % Line continuation (...) like blue comment
+        numbers=left, % Line numbers on left
+        firstnumber=1, % Line numbers start with line 1
+        numberstyle=\tiny\color{Blue}, % Line numbers are blue and small
+        stepnumber=5 % Line numbers go in steps of 5
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\rscript}[2]{
+\begin{itemize}
+\item[]\lstinputlisting[caption=#2,label=#1]{#1.r}
+\end{itemize}
+}
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT STRUCTURE COMMANDS
+%	Skip this unless you know what you're doing
+%----------------------------------------------------------------------------------------
+
+% Header and footer for when a page split occurs within a problem environment
+\newcommand{\enterProblemHeader}[1]{
+\nobreak\extramarks{#1}{#1 continued on next page\ldots}\nobreak
+\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+}
+
+% Header and footer for when a page split occurs between problem environments
+\newcommand{\exitProblemHeader}[1]{
+\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+\nobreak\extramarks{#1}{}\nobreak
+}
+
+\setcounter{secnumdepth}{0} % Removes default section numbers
+\newcounter{homeworkProblemCounter} % Creates a counter to keep track of the number of problems
+
+\newcommand{\homeworkProblemName}{}
+\newenvironment{homeworkProblem}[1][Problem \arabic{homeworkProblemCounter}]{ % Makes a new environment called homeworkProblem which takes 1 argument (custom name) but the default is "Problem #"
+\stepcounter{homeworkProblemCounter} % Increase counter for number of problems
+\renewcommand{\homeworkProblemName}{#1} % Assign \homeworkProblemName the name of the problem
+\section{\homeworkProblemName} % Make a section in the document with the custom problem count
+\enterProblemHeader{\homeworkProblemName} % Header and footer within the environment
+}{
+\exitProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+\newcommand{\problemAnswer}[1]{ % Defines the problem answer command with the content as the only argument
+\noindent\framebox[\columnwidth][c]{\begin{minipage}{0.98\columnwidth}#1\end{minipage}} % Makes the box around the problem answer and puts the content inside
+}
+
+\newcommand{\homeworkSectionName}{}
+\newenvironment{homeworkSection}[1]{ % New environment for sections within homework problems, takes 1 argument - the name of the section
+\renewcommand{\homeworkSectionName}{#1} % Assign \homeworkSectionName to the name of the section from the environment argument
+\subsection{\homeworkSectionName} % Make a subsection with the custom name of the subsection
+\enterProblemHeader{\homeworkProblemName\ [\homeworkSectionName]} % Header and footer within the environment
+}{
+\enterProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+%----------------------------------------------------------------------------------------
+%	NAME AND CLASS SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\hmwkTitle}{Final Project Notes} % Assignment title
+\newcommand{\hmwkDueDate}{\today} % Due date
+\newcommand{\hmwkClass}{SDS\ 383D} % Course/class
+\newcommand{\hmwkClassTime}{} % Class/lecture time
+\newcommand{\hmwkClassInstructor}{Professor Scott} % Teacher/lecturer
+\newcommand{\hmwkAuthorName}{Spencer Woody} % Your name
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title{
+\vspace{2in}
+\textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+\normalsize\vspace{0.1in}\small{\hmwkDueDate}\\
+\vspace{0.1in}\large{\textit{\hmwkClassInstructor\ }}
+\vspace{3in}
+}
+
+\author{\textbf{\hmwkAuthorName}}
+\date{} % Insert date here if you want it to appear below your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle
+
+\newpage
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 1
+%----------------------------------------------------------------------------------------
+
+\Large
+
+\normalsize
+%
+%
+% \bm{\uppsi}
+%
+%
+Let $y_{nrt}$ be the read count of gene $n \in \left\{ 1,2,\ldots N \right\}$ in replicate $r \in \left\{ 1, 2, \ldots, R_n \right\}$ at continuous time $t \in \mathbf{t}_{nr}$, where $\mathbf{t}_{nr}$ is a vector of length $T_{nr}$. We use a negative-binomial regression model, 
+%
+% t \in \left\{ 1, 2, \ldots, N_{nr} \right\}
+%
+\begin{align*}
+	(y_{nrt} | \psi_{nr}(t)) &\sim \text{NB}\left( \alpha_{n} , \frac{\exp\left[ \psi_{nr}(t) \right]}{1 + \exp\left[ \psi_{nr}(t) \right]} \right),
+\end{align*}
+%
+%
+%
+%
+with a hierarchical Gaussian process prior on $\psi_{nr}(t),$
+%
+%
+\begin{align*}
+	\psi_{nr}(t) &\sim \text{GP}(g_n(t), k_\psi(t, t')) \\
+	g_n(t) &\sim \text{GP}(0, k_g(t, t')),
+\end{align*}
+%
+%
+for some covariance functions $k_\psi(t, t')$ and $k_g(t, t'),$ which respectively depend on hyperparameters $\theta_\psi$ and $\theta_g$ (which might both be vectors). Notice that the expectation of $y_{nrt}$ is 
+%
+%
+\begin{align*}
+	\mathbb{E}(y_{nrt} | \psi_{nr}(t)) &= \alpha_{n} \cdot \exp\left[ \psi_{nr}(t) \right]
+\end{align*}
+%
+%
+Then introduce a Polya-Gamma latent variable,
+%
+%
+\begin{align*}
+	\omega_{nrt} &\sim \text{PG}(y_{nrt} + \alpha_{n}, 0),
+\end{align*}
+%
+%
+whose expectation is 
+%
+%
+\begin{align*}
+	\mathbb{E}_{\omega_{nrt}}\left[ \exp\left( -\omega_{nrt}\left[ \psi_{nr}(t) \right]^2 / 2 \right) \right] &= \cosh^{-(y_{nrt} + \alpha_{n})}(\psi_{nr}(t) / 2).
+\end{align*}
+%
+%
+The joint likelihood may be written as 
+%
+%
+\begin{align*}
+	p(y_{nrt} | \psi_{nr}(t), \omega_{nrt}) &\propto \frac{ \left( \exp\left[ \psi_{nr}(t) \right] \right)^{y_{nrt}}}{\left( 1 +  \exp\left[ \psi_{nr}(t) \right] \right)^{\alpha_{n} + y_{nrt}}} \\
+	%
+	&= \frac{2^{-(y_{nrt} + \alpha_{n})} \cdot \exp\left( \frac{y_{nrt} - \alpha_{n}}{2} \psi_{nr}(t) \right)}{\cosh^{y_{nrt} + \alpha_{n}}(\psi_{nr}(t) / 2)} \\
+	%
+	&\propto \exp\left( \frac{y_{nrt} - \alpha_{n}}{2} \psi_{nr}(t) \right) \mathbb{E}_{\omega_{nrt}}\left[ \exp\left( -\omega_{nrt}\left[ \psi_{nr}(t) \right]^2 / 2 \right) \right].
+\end{align*}
+%
+%
+Suppose we have observations from times $\mathbf{t}_{nr},$ so the data vector is $\y_{nr} = \left\{ y_{nrt} \right\}_{t\in\mathbf{t}_{nr}}$ which is associated with draws from the GP $\bm{\uppsi}_{nr} = \left\{ \psi_{nr}(t) \right\}_{t\in\mathbf{t}_{nr}}$. Then there is the latent variable vector $\bm{\upomega}_{nr} = \left\{ \omega_{nrt} \right\}_{t\in\mathbf{t}_{nr}}$, and also define the diagonal matrix $\bm{\Omega}_{nr} = \text{diag}\left( \bm{\upomega}_{nr} \right).$ Finally define the vector $\g_n$ be a vector of draws from the GP $g_n(t, t')$ at times $\mathbf{t}_{nr}$ and the matrix $\K_\psi(\mathbf{t}_{nr}, \mathbf{t}_{nr'})$ such that it's $(i, j)$ element is $k_\psi(\mathbf{t}_{nr}[i], \mathbf{t}_{nr'}[j])$ and $\K_g(\mathbf{t}_{nr}, \mathbf{t}_{nr'})$ is defined similarly. Now we can find the marginal prior of distribution of $\bm{\uppsi}_{nr} $ with 
+
+
+\begin{align*}
+	p(\bm{\uppsi}_{nr} | \g_{n}, \theta_{\psi}) &\sim \pN \left( \f_n, \K_{\psi}(\mathbf{t}_{nr}, \mathbf{t}_{nr}) \right) \\
+	%
+	%
+	p(\f_n | \theta_{g})  &\sim \pN \left( \mathbf{0}, \K_g(\mathbf{t}_{nr}, \mathbf{t}_{nr}) \right) \\
+	%
+	%
+	\Rightarrow p(\bm{\uppsi}_{nr} | \theta_{\psi}, \theta_g) &\sim \pN\left( \mathbf{0}, \K_{\psi}(\mathbf{t}_{nr}, \mathbf{t}_{nr}) + \K_{g}(\mathbf{t}_{nr}, \mathbf{t}_{nr}) \right).
+\end{align*}
+%
+%
+%
+Define the vector $\bm{\uptheta} = (\theta_\psi, \theta_g)^T$ to contain the hyperparameters of both covariance functions, $k_g(\cdot, \cdot)$ and $k_\psi(\cdot, \cdot)$. We can now write the prior of the concatenated vector $\bm{\uppsi}_n = \left\{ \bm{\uppsi}_{nr}  \right\}_{r=1}^{R_{n}}$ as 
+%
+%
+\begin{align*}
+	p(\bm{\uppsi}_n | \bm{\uptheta}) &= \pN(\mathbf{0}, \K_n)
+\end{align*}
+%
+%
+where the matrix $\K_n$ is a $R_n \times R_n$ arrangement of matrices, each of which has dimension $T_{nr} \times T_{nr'}$ and is 
+%
+%
+\begin{align*}
+	\K_n[r, r'] = \text{cov}(\bm{\uppsi}_{nr}, \bm{\uppsi}_{nr'}) &= \begin{cases}
+		\K_g(\mathbf{t}_{nr}, \mathbf{t}_{nr}) + \K_\psi(\mathbf{t}_{nr}, \mathbf{t}_{nr}) & \text{ if } r=r' \\
+		\K_g(\mathbf{t}_{nr}, \mathbf{t}_{nr'}) & \text{ otherwise}
+	\end{cases}
+\end{align*} 
+%
+%
+The conditional posterior of $\bm{\uppsi}_{n}$, given the values of $\bm{\upomega}_{n}$ and the data vector $\y_{n} = \left\{ \y_{nr} \right\}_{r=1}^{R_{n}}$ is 
+%
+%
+\begin{align*}
+	p(\bm{\uppsi}_{n} | \y_{n}, \bm{\upomega}_{n}, \bm{\uptheta}),  &\propto p(\bm{\uppsi}_n | \bm{\uptheta}) \prod_{r=1}^{R_n} \prod_{t\in\mathbf{t}_{nr}} p(y_{nrt} | \psi_{nr}(t), \omega_{nrt}) \\% p(\y_n | \bm{\uppsi}_n, \bm{\upomega}_n) \\
+	%
+	%
+	 &\propto p(\bm{\uppsi}_n | \bm{\uptheta}) \prod_{r=1}^{R_n} \prod_{t\in\mathbf{t}_{nr}} \exp\left[ -\frac{\omega_{nrt}}{2}\left( \psi_{nr}(t) - \frac{y_{nrt} - \alpha_{n}}{2 \omega_{nrt}} \right)^2 \right] \text{, define } z_{nrt} = \frac{y_{nrt} - \alpha_{n}}{2 }, \\
+	%
+	%
+	&\propto p(\bm{\uppsi}_{n} | \bm{\uptheta}) \cdot \exp \left[ -\frac{1}{2} \left( \bm{\uppsi}_{n} - \bm{\Omega}^{-1}_{n} \mathbf{z}_n \right)^T \bm{\Omega}_{n} \left( \bm{\uppsi}_{n} - \bm{\Omega}_{n}^{-1} \mathbf{z}_n \right) \right] \\
+	%
+	%
+	&\propto \pN \left(\bm{\uppsi}_{n} | \bm{\Sigma}_{n} \mathbf{z}_n, \bm{\Sigma}_{n}  \right), \text{ with } \bm{\Sigma}_{n} = \left( \K_n^{-1} + \bm{\Omega}_{n} \right)^{-1}.
+\end{align*}
+%
+%
+%
+%
+The conditional posterior of each $\omega_{nrt}$ is 
+%
+%
+\begin{align*}
+	p(\omega_{nrt} | y_{nrt}, \psi_{nr}(t), \mathbf{t}_{nr}) &\propto \left[ \exp\left( -\omega_{nrt}\left[ \psi_{nr}(t) \right]^2 / 2 \right) \right] \cdot \text{PG}(\omega_{nrt} | y_{nrt} + \alpha_{n}, 0) \\
+	&\propto \text{PG}(\omega_{nrt} | y_{nrt} + \alpha_{n}, \psi_{nr}(t)).
+\end{align*}
+
+\section{Prediction}
+
+Now suppose that we want to infer the underlying time series of both the gene-level function and each replicate-level function, i.e. $\mathbf{g}_n^\star$ which is $g_n(t)$ at times $\mathbf{t}_{n}^\star$ and $\bm{\uppsi}_{nr}^{\star}$ which is $\psi_{nr}(t)$ at times $\mathbf{t}_{nr}^\star$. The respective joint distributions between these vectors and $\bm{\uppsi}_{n}$ are 
+%
+%
+\begin{align*}
+	\begin{bmatrix}
+			\bm{\uppsi}_{n} \\
+			\mathbf{g}_{n}^\star 
+	\end{bmatrix} &\sim \pN \left( \mathbf{0}, \begin{bmatrix}
+ 			\K_n & \K_{n\star}^T \\
+ 			\K_{n\star} & \K_{n\star\star}
+ 		\end{bmatrix} \right) \\
+%
+%
+	\begin{bmatrix}
+		\bm{\uppsi}_{n} \\
+		\bm{\uppsi}_{nr}^\star
+	\end{bmatrix} &\sim \pN \left( \mathbf{0}, \begin{bmatrix}
+		\K_n & \K_{nr\star}^T \\
+		\K_{nr\star} & \K_{nr\star\star}
+	\end{bmatrix} \right) 
+\end{align*}
+%
+%
+with $\K_{n\star}$ and $\K_{nr\star}$ are defined element-wise such that 
+%
+%
+\begin{align*}
+	\K_{n\star}[i, j] &= \text{cov}\left( \mathbf{g}_{n}^\star[i] , \bm{\uppsi}_{n}[j] \right) = k_g(\mathbf{t}_{n}^\star[i], \mathbf{t}_n[j]) \\
+	%
+	%
+	\K_{nr\star}[i, j] &= \text{cov}\left( \bm{\uppsi}_{nr}^\star[i], \bm{\uppsi}_{n}[j] \in \bm{\uppsi}_{nr'}  \right) = \begin{cases}
+		k_g(\mathbf{t}_{nr}^\star[i], \mathbf{t}_n[j]) + k_\psi(\mathbf{t}_{nr}^\star[i], \mathbf{t}_n[j]) & \text{if } r = r' \\
+		k_g(\mathbf{t}_{ni}^\star[i], \mathbf{t}_n[j]) & \text{otherwise}
+	\end{cases},
+\end{align*}
+%
+%
+and the matrices $\K_{n\star\star}$ and $\K_{nr\star\star}$ are
+%
+%
+\begin{align*}
+	\K_{n\star\star} &= \K_g(\mathbf{t}_{n}^\star, \mathbf{t}_{n}^\star) \\
+	\K_{n\star\star} &= \K_g(\mathbf{t}_{n}^\star, \mathbf{t}_{n}^\star) + \K_\psi(\mathbf{t}_{n}^\star, \mathbf{t}_{n}^\star). 
+\end{align*}
+%
+%
+%
+The conditional distribution of $\mathbf{g}_n^\star$ given $\bm{\uppsi}_{n}$ is 
+%
+%
+\begin{align*}
+	(\mathbf{g}_{n}^\star | \bm{\uppsi}_{n} , \bm{\uptheta}) \sim \pN\left( \K_{n\star}\K_n^{-1}\bm{\uppsi}_{n},\; \K_{n\star\star} - \K_{n\star}\K_n^{-1}\K_{n\star}^T \right).
+\end{align*}
+%
+%
+%
+Given the fact that the marginal posterior of $\bm{\uppsi}_{n}$ is
+%
+%
+\begin{align*}
+	(\bm{\uppsi}_{n} | \y_{n}, \bm{\upomega}_{n}, \bm{\uptheta})  &\sim \pN \left(\bm{\Sigma}_{n} \mathbf{z}_n, \bm{\Sigma}_{n}  \right),
+\end{align*}
+%
+%
+and using Lemma \ref{lem:joint} we can write the marginal posterior of $\mathbf{g}_n^\star$ as 
+%
+%
+\begin{align*}
+	(\mathbf{g}_n^\star | \y_{n}, \bm{\upomega}_{n}, \bm{\uptheta}) &\sim \pN \left( \K_{n\star}\K_n^{-1}\bm{\Sigma}_{n} \mathbf{z}_n,\; \K_{n\star}\K_n^{-1}\bm{\Sigma}_{n}\K_n^{-1} \K_{n\star}^T + \K_{n\star\star} - \K_{n\star}\K_n^{-1}\K_{n\star}^T \right).
+\end{align*}
+%
+%
+Similarly, the marginal posterior of $\bm{\uppsi}_{nr}^{\star}$ is 
+%
+%
+\begin{align*}
+	(\bm{\uppsi}_{nr}^{\star} | \y_{n}, \bm{\upomega}_{n}, \bm{\uptheta}) &\sim \pN \left( \K_{nr\star}\K_n^{-1}\bm{\Sigma}_{n} \mathbf{z}_n,\; \K_{nr\star}\K_n^{-1}\bm{\Sigma}_{n}\K_n^{-1} \K_{nr\star}^T + \K_{nr\star\star} - \K_{nr\star}\K_n^{-1}\K_{nr\star}^T \right).
+\end{align*}
+%
+%
+\section{Covariance matrix function}
+%
+%
+We choose the $\text{Mat\'{e}rn(5/2)}$ covariance function,
+%
+%
+\begin{align}
+	k(t, t') &= \tau_1^2 \exp\left\{ 1 + \sqrt{5} \cdot \frac{d}{b} + \frac{5}{3} \cdot \frac{d^2}{b^2} \right\} \exp \left\{ -\sqrt{5} \cdot \frac{d}{b} \right \} , \; d = \|t - t' \|,
+\end{align}
+%
+%
+so the parameters are $\theta = (b, \tau_1^2)^T$, and we refer to $b$ as the \emph{relative length} parameter, $\tau_1^2$ is the \emph{amplitude} parameter, and $\tau_1^2$ is the \emph{nugget} parameter.
+%
+%
+%
+%
+\begin{lemma}\label{lem:joint}
+	Define the random vectors $x$ and $\gamma$ such that the conditional distribution of $x$ given $\gamma$ and the marginal distribution of $\gamma$ are, respectively,
+	%
+	% 
+	\begin{align*}
+		(x | \gamma) &\sim \pN_n(A\gamma, \Sigma) \\
+		\gamma &\sim \pN_p(m, V)
+	\end{align*}
+	%
+	%
+	where $A$ is a $n \times p$ matrix. Then the joint distribution of $(x, \gamma)$ is 
+	%
+	%
+	\begin{align}
+		\begin{bmatrix}
+			x \\
+			\gamma
+		\end{bmatrix} &\sim \pN \left( \begin{bmatrix}
+			Am \\
+			m
+		\end{bmatrix}, \begin{bmatrix}
+			AVA^T + \Sigma & AV \\
+			VA^T & \Sigma
+		\end{bmatrix} \right). \label{eqn:lemmaresult}
+	\end{align}
+	%
+	%
+	\begin{proof}
+		Equivalently, $x$ may be written as  
+		%
+		%
+		\begin{align*}
+			x = A\gamma + \epsilon,\;\; \epsilon &\sim \pN_n(0, \Sigma) 
+		\end{align*}
+		%
+		%
+		and then $(x, \gamma)^T$ is multivariate normal because it can be written as an affine transformation of univariate normal variables,
+		%
+		%
+		\begin{align*}
+			\begin{bmatrix}
+				x \\
+				\gamma
+			\end{bmatrix} &= \begin{bmatrix}
+				A \\ 
+				\mathcal{I}_p
+			\end{bmatrix} \gamma + \begin{bmatrix}
+				\mathcal{I}_n \\
+				\mathcal{O}_{p \times n}
+			\end{bmatrix} \epsilon.
+		\end{align*}
+		%
+		%
+		From this, the mean and covariance matrix in (\ref{eqn:lemmaresult}) may be derived from properties of the multivatiate normal distribution.
+	\end{proof}
+\end{lemma} 
+
+
+
+%%----------------------------------------------------------------------------------------
+%%	LIST CODE
+%%----------------------------------------------------------------------------------------
+%
+% \pagebreak
+% % \rscript{homework03.r}{Sample Perl Script With Highlighting}
+% R code for \texttt{myfuns03.R}
+% \lstinputlisting[language=R]{myfuns03.R}
+% \pagebreak
+% R code for \texttt{exercises03.R}
+% \lstinputlisting[language=R]{exercises03.R}
+%
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

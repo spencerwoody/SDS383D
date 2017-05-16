@@ -38,8 +38,6 @@ C.SE <- function(dist, bool = F, params = NA) {
 	return(c.se)
 }
 
-
-
 make.covmat <- function(t1, t2 = NA, cov.fun, params = NA) {
 	# ----------------------------------------------------------------------
 	#  Compute the Covariance matrix for a GP, with some cov. function
