@@ -3,6 +3,3 @@ Greetings, human! Welcome to my personal repo page for SDS383D for the spring 20
 
 The main class page is [here](https://github.com/jgscott/SDS383D).
 
-Testing out a change on my Linux desktop...
-
- 
